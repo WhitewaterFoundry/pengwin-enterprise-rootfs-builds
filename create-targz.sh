@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 
 #declare variables
 ORIGINDIR=$(pwd)
-TMPDIR=$(mktemp -d)
+TMPDIR=$(mktemp -d -p "${ORIGINDIR}")
 BUILDDIR=$(mktemp -d)
 INSTALLISO=${ORIGINDIR}/install.iso
 
