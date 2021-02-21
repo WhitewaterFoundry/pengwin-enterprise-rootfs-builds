@@ -60,5 +60,5 @@ cd "${ORIGINDIR}"
 #clean up
 sudo rm -r "${BUILDDIR}"
 sudo rm -r "$TMPDIR"
-sudo rm /tmp/install.iso
+sudo rm "${INSTALLISO}"
 sudo rm /var/tmp/install.tar.xz
