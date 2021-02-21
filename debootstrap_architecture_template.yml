@@ -1,0 +1,63 @@
+jobs:
+- job: startAgent
+  pool:
+    vmImage: ubuntu-latest
+  variables:
+    AWS_INSTANCE_ID: ${{ parameters.aws_instance_id }}
+
+  steps:
+
+  - task: DownloadSecureFile@1
+    name: awsCredentials
+    inputs:
+      secureFile: 'credentials'
+
+  - task: DownloadSecureFile@1
+    name: awsConfig
+    inputs:
+      secureFile: 'config'
+
+  - script: |
+      mkdir -p "${HOME}/.aws"
+      cp "$(awsCredentials.secureFilePath)" "${HOME}/.aws/credentials"
+      cp "$(awsConfig.secureFilePath)" "${HOME}/.aws/config"
+      aws ec2 start-instances --instance-ids $(AWS_INSTANCE_ID)
+    displayName: 'Copy credentials'
+
+  - script: |
+
+    displayName: 'Start instance'
+
+- job: ${{ parameters.arch }}
+  dependsOn: [ startAgent ]
+  pool:
+    name: Fedora
+    demands:
+      - Agent.OSArchitecture -equals ${{ parameters.agent_arch }}
+  variables:
+    ARCH: ${{ parameters.arch }}
+    ARCHDIR: ${{ parameters.arch_dir }}
+  steps:
+
+  #- script: |
+  #    sudo rm -rf rootfs
+  #    mkdir rootfs
+  #  displayName: 'Creating rootfs folder'
+
+  - script: sudo bash create-targz.sh $(ARCH) "$PWD/rootfs"
+    displayName: 'Build image'
+
+  - script: |
+      cp $(ARCHDIR)/install.tar.gz $(Build.ArtifactStagingDirectory)/install_$(ARCHDIR)_rootfs.tar.gz
+      sudo rm -rf $(ARCHDIR)/install.tar.gz
+    displayName: 'Copy for publishing'
+
+  - task: PublishBuildArtifacts@1
+
+  - script: |
+      sudo shutdown -r 1
+
+    displayName: Clean up
+
+
+
