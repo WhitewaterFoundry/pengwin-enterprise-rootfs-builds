@@ -6,7 +6,7 @@ set -x
 #declare variables
 ORIGINDIR=$(pwd)
 TMPDIR=$(mktemp -d -p "${ORIGINDIR}")
-BUILDDIR=$(mktemp -d)
+BUILDDIR=$(mktemp -d -p "${ORIGINDIR}")
 INSTALLISO=${ORIGINDIR}/install.iso
 
 #enterprise boot ISO
