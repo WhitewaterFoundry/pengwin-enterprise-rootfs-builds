@@ -6,6 +6,7 @@ set -e
 ORIGINDIR=$(pwd)
 TMPDIR=$(mktemp -d)
 BUILDDIR=$(mktemp -d)
+INSTALLISO=${ORIGINDIR}/install.iso
 
 #enterprise boot ISO
 BOOTISO="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
@@ -26,8 +27,8 @@ sudo yum -y install libvirt lorax virt-install libvirt-daemon-config-network lib
 sudo systemctl restart libvirtd
 
 #download enterprise boot ISO
-if [[ ! -f /tmp/install.iso ]] ; then
-  sudo curl $BOOTISO -o /tmp/install.iso
+if [[ ! -f ${INSTALLISO} ]] ; then
+  sudo curl $BOOTISO -o "${INSTALLISO}"
 fi
 #download enterprise Docker kickstart file
 curl $KSFILE -o install.ks
@@ -35,7 +36,7 @@ curl $KSFILE -o install.ks
 rm -f /var/tmp/install.tar.xz
 
 #build intermediary rootfs tar
-sudo livemedia-creator --make-tar --iso=/tmp/install.iso --image-name=install.tar.xz --ks=install.ks --releasever "7"
+sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.xz --ks=install.ks --releasever "7"
 
 #open up the tar into our build directory
 tar -xvf /var/tmp/install.tar.xz -C "${BUILDDIR}"
