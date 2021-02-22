@@ -21,11 +21,10 @@ jobs:
       mkdir -p "${HOME}/.aws"
       cp "$(awsCredentials.secureFilePath)" "${HOME}/.aws/credentials"
       cp "$(awsConfig.secureFilePath)" "${HOME}/.aws/config"
-      aws ec2 start-instances --instance-ids $(AWS_INSTANCE_ID)
     displayName: 'Copy credentials'
 
   - script: |
-
+      aws ec2 start-instances --instance-ids $(AWS_INSTANCE_ID)
     displayName: 'Start instance'
 
 - job: ${{ parameters.arch }}
@@ -63,7 +62,7 @@ jobs:
       sudo rm -rf /home/fedora/myagent/_work/*
       sudo shutdown -r 1
     condition: always()
-    
+
     displayName: Clean up
 
 
