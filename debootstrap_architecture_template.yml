@@ -41,10 +41,11 @@ jobs:
     ARCHDIR: ${{ parameters.arch_dir }}
   steps:
 
-  #- script: |
-  #    sudo rm -rf rootfs
-  #    mkdir rootfs
-  #  displayName: 'Creating rootfs folder'
+  - script: |
+      sudo umount --quiet /dev/nvme1n1
+      sudo mkfs -t xfs -f /dev/nvme1n1
+      sudo mount /dev/nvme1n1 /tmp
+    displayName: 'Preparing'
 
   - script: sudo bash create-targz.sh $(ARCH) "$PWD/rootfs"
     displayName: 'Build image'
