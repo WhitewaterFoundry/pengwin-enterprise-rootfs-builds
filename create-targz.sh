@@ -25,7 +25,7 @@ sudo yum -y update
 sudo yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
 
 #get anaconda dependencies
-sudo yum -y install anaconda anaconda-tui
+#sudo yum -y install anaconda anaconda-tui
 
 #restart libvirtd for good measure
 sudo systemctl restart libvirtd
@@ -40,7 +40,7 @@ curl $KSFILE -o install.ks
 rm -f /var/tmp/install.tar.xz
 
 #build intermediary rootfs tar
-sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.xz --ks=install.ks --releasever "7" --no-virt
+sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.xz --ks=install.ks --releasever "7" 
 
 #open up the tar into our build directory
 tar -xvf /var/tmp/install.tar.xz -C "${BUILDDIR}"
