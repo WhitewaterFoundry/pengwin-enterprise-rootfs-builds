@@ -5,9 +5,10 @@ set -x
 
 #declare variables
 ORIGINDIR=$(pwd)
-TMPDIR=$(mktemp -d -p "${ORIGINDIR}")
-BUILDDIR=$(mktemp -d -p "${ORIGINDIR}")
+TMPDIR=$(mktemp -d)
+BUILDDIR=$(mktemp -d)
 INSTALLISO=${ORIGINDIR}/install.iso
+INSTALL_TAR_XZ=/tmp/install.tar.xz
 
 #enterprise boot ISO
 BOOTISO="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
@@ -37,13 +38,13 @@ fi
 #download enterprise Docker kickstart file
 curl $KSFILE -o install.ks
 
-rm -f /var/tmp/install.tar.xz
+rm -f "${INSTALL_TAR_XZ}"
 
 #build intermediary rootfs tar
 sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.xz --ks=install.ks --releasever "7" --vcpus 2
 
 #open up the tar into our build directory
-tar -xvf /var/tmp/install.tar.xz -C "${BUILDDIR}"
+tar -xvf "${INSTALL_TAR_XZ}" -C "${BUILDDIR}"
 
 #copy some custom files into our build directory
 sudo cp "${ORIGINDIR}"/linux_files/wsl.conf "${BUILDDIR}"/etc/wsl.conf
@@ -64,6 +65,6 @@ cd "${ORIGINDIR}"
 
 #clean up
 sudo rm -r "${BUILDDIR}"
-sudo rm -r "$TMPDIR"
+sudo rm -r "${TMPDIR}"
 sudo rm "${INSTALLISO}"
-sudo rm /var/tmp/install.tar.xz
+sudo rm "${INSTALL_TAR_XZ}"
