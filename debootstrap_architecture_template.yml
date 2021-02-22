@@ -45,6 +45,8 @@ jobs:
       sudo umount --quiet /dev/nvme1n1
       sudo mkfs -t xfs -f /dev/nvme1n1
       sudo mount /dev/nvme1n1 /tmp
+      sudo chown -R fedora:fedora /tmp
+      sudo chmod -R 777 /tmp
     displayName: 'Preparing'
 
   - script: sudo bash create-targz.sh $(ARCH) "$PWD/rootfs"
