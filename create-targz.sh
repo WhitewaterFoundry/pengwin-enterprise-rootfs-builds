@@ -24,6 +24,9 @@ sudo yum -y update
 #get livemedia-creator dependencies
 sudo yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
 
+#get anaconda dependencies
+sudo yum -y install anaconda anaconda-tui
+
 #restart libvirtd for good measure
 sudo systemctl restart libvirtd
 
