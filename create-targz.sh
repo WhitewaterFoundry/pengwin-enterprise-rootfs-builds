@@ -53,6 +53,7 @@ sudo chmod +x "${BUILDDIR}"/usr/local/bin/upgrade.sh
 
 #re-build our tar image
 cd "${BUILDDIR}"
+mkdir -p "${ORIGINDIR}"/x64
 tar --ignore-failed-read -czvf "${ORIGINDIR}"/x64/install.tar.gz *
 
 #go home
