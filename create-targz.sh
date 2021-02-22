@@ -40,7 +40,7 @@ curl $KSFILE -o install.ks
 rm -f /var/tmp/install.tar.xz
 
 #build intermediary rootfs tar
-sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.xz --ks=install.ks --releasever "7" 
+sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.xz --ks=install.ks --releasever "7" --vcpus 2
 
 #open up the tar into our build directory
 tar -xvf /var/tmp/install.tar.xz -C "${BUILDDIR}"
