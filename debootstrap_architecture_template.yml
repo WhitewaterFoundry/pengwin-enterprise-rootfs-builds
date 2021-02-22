@@ -30,12 +30,12 @@ jobs:
 
 - job: ${{ parameters.arch }}
   dependsOn: [ startAgent ]
+  workspace:
+    clean: all
   pool:
     name: Fedora
     demands:
       - Agent.OSArchitecture -equals ${{ parameters.agent_arch }}
-    workspace:
-      clean: all
   variables:
     ARCH: ${{ parameters.arch }}
     ARCHDIR: ${{ parameters.arch_dir }}
