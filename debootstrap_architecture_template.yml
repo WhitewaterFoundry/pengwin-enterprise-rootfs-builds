@@ -57,8 +57,10 @@ jobs:
   - task: PublishBuildArtifacts@1
 
   - script: |
+      sudo rm -rf /home/fedora/myagent/_work
       sudo shutdown -r 1
-
+    condition: always()
+    
     displayName: Clean up
 
 
