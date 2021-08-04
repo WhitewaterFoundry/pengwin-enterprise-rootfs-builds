@@ -10,10 +10,10 @@ INSTALLISO=${ORIGINDIR}/install.iso
 INSTALL_TAR=/tmp/install.tar.gz
 
 #enterprise boot ISO
-BOOTISO="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
+BOOTISO="/root/install.iso"
 
 #enterprise Docker kickstart file
-KSFILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-7.ks"
+KSFILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
 
 #go to our temporary directory
 cd "$TMPDIR"
@@ -25,14 +25,14 @@ echo "##[section] get livemedia-creator dependencies"
 sudo yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
 
 #get anaconda dependencies
-#sudo yum -y install anaconda anaconda-tui
+sudo yum -y install anaconda anaconda-tui
 
 echo "##[section] restart libvirtd for good measure"
-sudo systemctl restart libvirtd
+#sudo systemctl restart libvirtd
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${INSTALLISO} ]] ; then
-  sudo curl $BOOTISO -o "${INSTALLISO}"
+  sudo cp "${BOOTISO}" "${INSTALLISO}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
 curl $KSFILE -o install.ks
@@ -40,7 +40,7 @@ curl $KSFILE -o install.ks
 rm -f "${INSTALL_TAR}"
 
 echo "##[section] build intermediary rootfs tar"
-sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.gz --ks=install.ks --releasever "7" --vcpus 2 --compression gzip --tmp /tmp
+sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 2 --compression gzip --tmp /tmp
 
 echo "##[section] open up the tar into our build directory"
 tar -xvzf "${INSTALL_TAR}" -C "${BUILDDIR}"
