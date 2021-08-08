@@ -36,13 +36,12 @@ if [[ ! -f ${INSTALLISO} ]] ; then
   sudo cp "${BOOTISO}" "${INSTALLISO}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
-#curl $KSFILE -o install.ks
-cp /mnt/f/WhitewaterFoundry/sig-cloud-instance-build/docker/rhel-8.ks install.ks
+curl $KSFILE -o install.ks
 
 sudo rm -f "${INSTALL_TAR_GZ}"
 
 echo "##[section] build intermediary rootfs tar"
-sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 32 --compression gzip --tmp /tmp
+sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 2 --compression gzip --tmp /tmp
 
 echo "##[section] open up the tar into our build directory"
 sudo gunzip "${INSTALL_TAR_GZ}"
