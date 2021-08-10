@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 
 #declare variables
 ORIGIN_DIR=$(pwd)
 TMPDIR=${2:-$(mktemp -d)}
 BUILD_DIR=${TMPDIR}/dist
 mkdir -p "${BUILD_DIR}"
+DEST_DIR=${TMPDIR}/dest
 INSTALL_ISO=${TMPDIR}/install.iso
-INSTALL_TAR=${TMPDIR}/install.tar
+INSTALL_TAR=${DEST_DIR}/install.tar
 INSTALL_TAR_GZ=${INSTALL_TAR}.gz
 
 #enterprise boot ISO
@@ -30,7 +32,7 @@ sudo yum -y install libvirt lorax virt-install libvirt-daemon-config-network lib
 #sudo yum -y install anaconda anaconda-tui
 
 echo "##[section] restart libvirtd for good measure"
-#sudo systemctl restart libvirtd
+sudo systemctl restart libvirtd
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${INSTALL_ISO} ]]; then
@@ -43,7 +45,9 @@ sudo rm -f "${INSTALL_TAR_GZ}"
 sudo rm -f "${INSTALL_TAR}"
 
 echo "##[section] build intermediary rootfs tar"
-sudo livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 2 --compression gzip --tmp /tmp
+sudo rm -rf "${DEST_DIR}"
+mkdir -p "${DEST_DIR}"
+sudo livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 4 --ram=4096 --compression gzip --tmp "${DEST_DIR}"
 
 echo "##[section] open up the tar into our build directory"
 sudo gunzip "${INSTALL_TAR_GZ}"
@@ -65,8 +69,14 @@ echo "##[section] re-build our tar image"
 tar -xvf "${INSTALL_TAR}" -C "${BUILD_DIR}"
 
 cd "${BUILD_DIR}"
+
+sudo chmod 640 etc/shadow*
+sudo chmod 640 etc/gshadow*
+sudo chmod +r usr/bin/sudo
+sudo chmod +r usr/bin/sudoreplay
+
 mkdir -p "${ORIGIN_DIR}"/x64
-tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${ORIGIN_DIR}"/x64/install.tar.gz ./*
+sudo tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${ORIGIN_DIR}"/x64/install.tar.gz ./*
 
 #sudo gzip "${INSTALL_TAR}"
 #sudo mv "${INSTALL_TAR_GZ}" "${ORIGIN_DIR}"/x64/install.tar.gz
@@ -78,4 +88,5 @@ echo "##[section] clean up"
 sudo rm -rf "${BUILD_DIR}"
 #sudo rm -rf "${TMPDIR}"
 #sudo rm -f "${INSTALL_ISO}"
-sudo rm -f "${INSTALL_TAR_GZ}"
+#sudo rm -f "${INSTALL_TAR_GZ}"
+sudo rm -rf "${DEST_DIR}"
