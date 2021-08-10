@@ -3,18 +3,19 @@
 set -e
 
 #declare variables
-ORIGINDIR=$(pwd)
-TMPDIR=$(mktemp -d)
-BUILDDIR=$(mktemp -d)
-INSTALLISO=${ORIGINDIR}/install.iso
-INSTALL_TAR=/tmp/install.tar
+ORIGIN_DIR=$(pwd)
+TMPDIR=${2:-$(mktemp -d)}
+BUILD_DIR=${TMPDIR}/dist
+mkdir -p "${BUILD_DIR}"
+INSTALL_ISO=${TMPDIR}/install.iso
+INSTALL_TAR=${TMPDIR}/install.tar
 INSTALL_TAR_GZ=${INSTALL_TAR}.gz
 
 #enterprise boot ISO
-BOOTISO="/root/install8.iso"
+BOOT_ISO="/root/install8.iso"
 
 #enterprise Docker kickstart file
-KSFILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
+KS_FILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
 
 #go to our temporary directory
 cd "$TMPDIR"
@@ -32,46 +33,49 @@ echo "##[section] restart libvirtd for good measure"
 #sudo systemctl restart libvirtd
 
 echo "##[section] download enterprise boot ISO"
-if [[ ! -f ${INSTALLISO} ]] ; then
-  sudo cp "${BOOTISO}" "${INSTALLISO}"
+if [[ ! -f ${INSTALL_ISO} ]]; then
+  sudo cp "${BOOT_ISO}" "${INSTALL_ISO}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
-curl $KSFILE -o install.ks
+curl $KS_FILE -o install.ks
 
 sudo rm -f "${INSTALL_TAR_GZ}"
+sudo rm -f "${INSTALL_TAR}"
 
 echo "##[section] build intermediary rootfs tar"
-sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 2 --compression gzip --tmp /tmp
+sudo livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 2 --compression gzip --tmp /tmp
 
 echo "##[section] open up the tar into our build directory"
 sudo gunzip "${INSTALL_TAR_GZ}"
-#tar -xvzf "${INSTALL_TAR_GZ}" -C "${BUILDDIR}"
 
 echo "##[section] copy some custom files into our build directory"
 mkdir -p temp/etc/fonts
-sudo cp "${ORIGINDIR}"/linux_files/wsl.conf temp/etc/wsl.conf
-sudo cp "${ORIGINDIR}"/linux_files/local.conf temp/etc/fonts/local.conf
+sudo cp "${ORIGIN_DIR}"/linux_files/wsl.conf temp/etc/wsl.conf
+sudo cp "${ORIGIN_DIR}"/linux_files/local.conf temp/etc/fonts/local.conf
 mkdir -p temp/var/lib/rpm
-sudo cp "${ORIGINDIR}"/linux_files/DB_CONFIG temp/var/lib/rpm/
+sudo cp "${ORIGIN_DIR}"/linux_files/DB_CONFIG temp/var/lib/rpm/
 mkdir -p temp/etc/profile.d
-sudo cp "${ORIGINDIR}"/linux_files/00-wle.sh temp/etc/profile.d/
+sudo cp "${ORIGIN_DIR}"/linux_files/00-wle.sh temp/etc/profile.d/
 mkdir -p temp/usr/local/bin
-sudo cp "${ORIGINDIR}"/linux_files/upgrade.sh temp/usr/local/bin/upgrade.sh
+sudo cp "${ORIGIN_DIR}"/linux_files/upgrade.sh temp/usr/local/bin/upgrade.sh
 sudo chmod +x temp/usr/local/bin/upgrade.sh
+sudo tar -rvf "${INSTALL_TAR}" -C temp .
 
 echo "##[section] re-build our tar image"
-#cd "${BUILDDIR}"
-mkdir -p "${ORIGINDIR}"/x64
-#tar --ignore-failed-read -czvf "${ORIGINDIR}"/x64/install.tar.gz *
-sudo tar -rvf "${INSTALL_TAR}" -C temp .
-sudo gzip "${INSTALL_TAR}"
-sudo mv "${INSTALL_TAR_GZ}" "${ORIGINDIR}"/x64/install.tar.gz
+tar -xvf "${INSTALL_TAR}" -C "${BUILD_DIR}"
+
+cd "${BUILD_DIR}"
+mkdir -p "${ORIGIN_DIR}"/x64
+tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${ORIGIN_DIR}"/x64/install.tar.gz ./*
+
+#sudo gzip "${INSTALL_TAR}"
+#sudo mv "${INSTALL_TAR_GZ}" "${ORIGIN_DIR}"/x64/install.tar.gz
 
 echo "##[section] go home"
-cd "${ORIGINDIR}"
+cd "${ORIGIN_DIR}"
 
 echo "##[section] clean up"
-sudo rm -rf "${BUILDDIR}"
-sudo rm -rf "${TMPDIR}"
-sudo rm -f "${INSTALLISO}"
+sudo rm -rf "${BUILD_DIR}"
+#sudo rm -rf "${TMPDIR}"
+#sudo rm -f "${INSTALL_ISO}"
 sudo rm -f "${INSTALL_TAR_GZ}"
