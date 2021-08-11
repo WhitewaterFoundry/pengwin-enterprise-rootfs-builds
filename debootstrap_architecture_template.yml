@@ -48,7 +48,7 @@ jobs:
       sudo chmod -R 777 /tmp
     displayName: 'Preparing'
 
-  - script: sudo bash create-targz.sh $(ARCH) "/tmp"
+  - script: time sudo bash create-targz.sh $(ARCH) "/tmp"
     displayName: 'Build image'
 
   - script: |
