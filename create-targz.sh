@@ -13,8 +13,7 @@ TMPDIR=${2:-$(mktemp -d)}
 BUILD_DIR=${TMPDIR}/dist
 DEST_DIR=${TMPDIR}/dest
 INSTALL_ISO=${TMPDIR}/install.iso
-INSTALL_TAR=${DEST_DIR}/install.tar
-INSTALL_TAR_GZ=${INSTALL_TAR}.gz
+INSTALL_TAR_GZ=${DEST_DIR}/install.tar.gz
 
 echo "##[section] clean up"
 rm -rf "${BUILD_DIR}"
@@ -52,13 +51,12 @@ echo "##[section] download enterprise Docker kickstart file"
 curl $KS_FILE -o install.ks
 
 rm -f "${INSTALL_TAR_GZ}"
-rm -f "${INSTALL_TAR}"
 
 echo "##[section] build intermediary rootfs tar"
 livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 4 --ram=4096 --compression gzip --tmp "${DEST_DIR}"
 
 echo "##[section] open up the tar into our build directory"
-tar -xvf "${INSTALL_TAR}" -C "${BUILD_DIR}"
+tar -xvf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
 
 echo "##[section] copy some custom files into our build directory"
 cp "${ORIGIN_DIR}"/linux_files/wsl.conf "${BUILD_DIR}"/etc/wsl.conf
