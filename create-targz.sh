@@ -32,16 +32,16 @@ KS_FILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-
 cd "$TMPDIR"
 
 echo "##[section] make sure we are up to date"
-yum -y update
+dnf -y update
 
 echo "##[section] get livemedia-creator dependencies"
-yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
+dnf -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
 
 #get anaconda dependencies
-#yum -y install anaconda anaconda-tui
+#dnf -y install anaconda anaconda-tui
 
 echo "##[section] restart libvirtd for good measure"
-systemctl restart libvirtd
+systemctl restart libvirtd || echo "Running without SystemD"
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${INSTALL_ISO} ]]; then
@@ -60,7 +60,7 @@ unset processor_count
 unset ram
 
 echo "##[section] open up the tar into our build directory"
-tar -xvf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
+tar -xf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
 
 echo "##[section] copy some custom files into our build directory"
 cp "${ORIGIN_DIR}"/linux_files/wsl.conf "${BUILD_DIR}"/etc/wsl.conf
