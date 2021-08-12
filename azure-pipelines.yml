@@ -1,5 +1,5 @@
 trigger:
-- master
+- rhel8
 
 stages:
 - stage: amd64
