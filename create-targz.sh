@@ -53,7 +53,11 @@ curl $KS_FILE -o install.ks
 rm -f "${INSTALL_TAR_GZ}"
 
 echo "##[section] build intermediary rootfs tar"
-livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 4 --ram=4096 --compression gzip --tmp "${DEST_DIR}"
+processor_count=$(grep -c processor /proc/cpuinfo)
+ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
+livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${DEST_DIR}"
+unset processor_count
+unset ram
 
 echo "##[section] open up the tar into our build directory"
 tar -xvf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
