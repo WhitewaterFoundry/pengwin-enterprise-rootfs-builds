@@ -53,7 +53,7 @@ curl $KS_FILE -o install.ks
 rm -f "${INSTALL_TAR_GZ}"
 
 echo "##[section] build intermediary rootfs tar"
-processor_count=$(echo "$(grep -c "processor.*:" /proc/cpuinfo) - 1" | bc -l)
+processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
 ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
 livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${DEST_DIR}"
 unset processor_count
