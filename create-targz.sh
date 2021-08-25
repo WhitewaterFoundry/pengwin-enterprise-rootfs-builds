@@ -32,16 +32,16 @@ KS_FILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-
 cd "$TMPDIR"
 
 echo "##[section] make sure we are up to date"
-yum -y update
+dnf -y update
 
 echo "##[section] get livemedia-creator dependencies"
-yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
+dnf -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
 
 #get anaconda dependencies
-#yum -y install anaconda anaconda-tui
+#dnf -y install anaconda anaconda-tui
 
 echo "##[section] restart libvirtd for good measure"
-systemctl restart libvirtd
+systemctl restart libvirtd || echo "Running without SystemD"
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${INSTALL_ISO} ]]; then
@@ -53,10 +53,14 @@ curl $KS_FILE -o install.ks
 rm -f "${INSTALL_TAR_GZ}"
 
 echo "##[section] build intermediary rootfs tar"
-livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 4 --ram=4096 --compression gzip --tmp "${DEST_DIR}"
+processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
+ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
+livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${DEST_DIR}"
+unset processor_count
+unset ram
 
 echo "##[section] open up the tar into our build directory"
-tar -xvf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
+tar -xf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
 
 echo "##[section] copy some custom files into our build directory"
 cp "${ORIGIN_DIR}"/linux_files/wsl.conf "${BUILD_DIR}"/etc/wsl.conf
