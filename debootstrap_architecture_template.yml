@@ -7,26 +7,34 @@ jobs:
 
   steps:
 
-  - task: DownloadSecureFile@1
-    name: awsCredentials
+  # - task: DownloadSecureFile@1
+  #   name: awsCredentials
+  #   inputs:
+  #     secureFile: 'credentials'
+
+  # - task: DownloadSecureFile@1
+  #   name: awsConfig
+  #   inputs:
+  #     secureFile: 'config'
+
+  # - script: |
+  #     mkdir -p "${HOME}/.aws"
+  #     cp "$(awsCredentials.secureFilePath)" "${HOME}/.aws/credentials"
+  #     cp "$(awsConfig.secureFilePath)" "${HOME}/.aws/config"
+  #   displayName: 'Copy credentials'
+
+  # - script: |
+  #     aws ec2 start-instances --instance-ids $(AWS_INSTANCE_ID)
+  #   displayName: 'Start instance'
+
+  - task: AzureCLI@2
     inputs:
-      secureFile: 'credentials'
-
-  - task: DownloadSecureFile@1
-    name: awsConfig
-    inputs:
-      secureFile: 'config'
-
-  - script: |
-      mkdir -p "${HOME}/.aws"
-      cp "$(awsCredentials.secureFilePath)" "${HOME}/.aws/credentials"
-      cp "$(awsConfig.secureFilePath)" "${HOME}/.aws/config"
-    displayName: 'Copy credentials'
-
-  - script: |
-      aws ec2 start-instances --instance-ids $(AWS_INSTANCE_ID)
+      azureSubscription: 'Azure subscription 1(cab104b5-7437-4adb-8ce9-cc164ab9d78c)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL'
     displayName: 'Start instance'
-
+    
 - job: ${{ parameters.arch }}
   dependsOn: [ startAgent ]
   workspace:
