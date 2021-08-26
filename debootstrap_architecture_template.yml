@@ -34,13 +34,13 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL'
     displayName: 'Start instance'
-    
+
 - job: ${{ parameters.arch }}
   dependsOn: [ startAgent ]
   workspace:
     clean: all
   pool:
-    name: Fedora
+    name: RHEL
     demands:
       - Agent.OSArchitecture -equals ${{ parameters.agent_arch }}
   variables:
@@ -48,15 +48,15 @@ jobs:
     ARCHDIR: ${{ parameters.arch_dir }}
   steps:
 
-  - script: |
-      sudo umount --quiet /dev/nvme1n1
-      sudo mkfs -t xfs -f /dev/nvme1n1
-      sudo mount /dev/nvme1n1 /tmp
-      sudo chown -R fedora:fedora /tmp
-      sudo chmod -R 777 /tmp
-    displayName: 'Preparing'
+#  - script: |
+#      sudo umount --quiet /dev/nvme1n1
+#      sudo mkfs -t xfs -f /dev/nvme1n1
+#      sudo mount /dev/nvme1n1 /tmp
+#      sudo chown -R fedora:fedora /tmp
+#      sudo chmod -R 777 /tmp
+#    displayName: 'Preparing'
 
-  - script: time sudo bash create-targz.sh $(ARCH) "/tmp"
+  - script: time sudo bash create-targz.sh $(ARCH) "/mnt"
     displayName: 'Build image'
 
   - script: |
@@ -67,7 +67,7 @@ jobs:
   - task: PublishBuildArtifacts@1
 
   - script: |
-      sudo rm -rf /home/fedora/myagent/_work/*
+      sudo rm -rf /home/azureuser/myagent/_work/*
       sudo shutdown -r 1
     condition: always()
 
