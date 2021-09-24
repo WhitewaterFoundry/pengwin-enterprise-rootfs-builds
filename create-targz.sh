@@ -26,8 +26,7 @@ mkdir -p "${build_dir}"
 boot_iso="https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.4-x86_64-dvd1.iso"
 
 #enterprise Docker kickstart file
-ks_file="F:\WhitewaterFoundry\sig-cloud-instance-build\docker\rockylinux-8.ks"
-#ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rockylinux-8.ks"
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rockylinux-8.ks"
 
 #go to our temporary directory
 cd "$tmp_dir"
@@ -49,8 +48,7 @@ if [[ ! -f ${install_iso} ]]; then
   curl $boot_iso -o "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
-#curl $ks_file -o install.ks
-cp $ks_file install.ks
+curl $ks_file -o install.ks
 
 rm -f "${install_tar_gz}"
 
