@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
@@ -8,28 +8,29 @@ if [[ ${USER} != "root" ]]; then
 fi
 
 #declare variables
-ORIGIN_DIR=$(pwd)
-TMPDIR=${2:-$(mktemp -d)}
-BUILD_DIR=${TMPDIR}/dist
-DEST_DIR=${TMPDIR}/dest
-INSTALL_ISO=${TMPDIR}/install.iso
-INSTALL_TAR_GZ=${DEST_DIR}/install.tar.gz
+origin_dir=$(pwd)
+tmp_dir=${2:-$(mktemp -d)}
+build_dir=${tmp_dir}/dist
+dest_dir=${tmp_dir}/dest
+install_iso=${tmp_dir}/install.iso
+install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
-rm -rf "${BUILD_DIR}"
-rm -rf "${DEST_DIR}"
+rm -rf "${build_dir}"
+rm -rf "${dest_dir}"
 
-mkdir -p "${DEST_DIR}"
-mkdir -p "${BUILD_DIR}"
+mkdir -p "${dest_dir}"
+mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-BOOT_ISO="/root/install8.iso"
+boot_iso="https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.4-x86_64-dvd1.iso"
 
 #enterprise Docker kickstart file
-KS_FILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
+ks_file="F:\WhitewaterFoundry\sig-cloud-instance-build\docker\rockylinux-8.ks"
+#ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rockylinux-8.ks"
 
 #go to our temporary directory
-cd "$TMPDIR"
+cd "$tmp_dir"
 
 echo "##[section] make sure we are up to date"
 yum -y update
@@ -44,41 +45,36 @@ echo "##[section] restart libvirtd for good measure"
 systemctl restart libvirtd
 
 echo "##[section] download enterprise boot ISO"
-if [[ ! -f ${INSTALL_ISO} ]]; then
-  cp "${BOOT_ISO}" "${INSTALL_ISO}"
+if [[ ! -f ${install_iso} ]]; then
+  curl $boot_iso -o "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
-curl $KS_FILE -o install.ks
+#curl $ks_file -o install.ks
+cp $ks_file install.ks
 
-rm -f "${INSTALL_TAR_GZ}"
+rm -f "${install_tar_gz}"
 
 echo "##[section] build intermediary rootfs tar"
-livemedia-creator --make-tar --iso="${INSTALL_ISO}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 4 --ram=4096 --compression gzip --tmp "${DEST_DIR}"
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus 4 --ram=4096 --compression gzip --tmp "${dest_dir}"
 
 echo "##[section] open up the tar into our build directory"
-tar -xvf "${INSTALL_TAR_GZ}" -C "${BUILD_DIR}"
+tar -xvf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] copy some custom files into our build directory"
-cp "${ORIGIN_DIR}"/linux_files/wsl.conf "${BUILD_DIR}"/etc/wsl.conf
-mkdir "${BUILD_DIR}"/etc/fonts
-cp "${ORIGIN_DIR}"/linux_files/local.conf "${BUILD_DIR}"/etc/fonts/local.conf
-cp "${ORIGIN_DIR}"/linux_files/DB_CONFIG "${BUILD_DIR}"/var/lib/rpm/
-cp "${ORIGIN_DIR}"/linux_files/00-wle.sh "${BUILD_DIR}"/etc/profile.d/
-cp "${ORIGIN_DIR}"/linux_files/upgrade.sh "${BUILD_DIR}"/usr/local/bin/upgrade.sh
-chmod +x "${BUILD_DIR}"/usr/local/bin/upgrade.sh
-ln -s "${BUILD_DIR}"/usr/local/bin/upgrade.sh "${BUILD_DIR}"/usr/local/bin/update.sh
+cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
+mkdir "${build_dir}"/etc/fonts
+cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
+cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
+cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
+cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
+chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
+ln -s "${build_dir}"/usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
 
 echo "##[section] re-build our tar image"
-cd "${BUILD_DIR}"
-
-#chmod 640 etc/shadow*
-#chmod 640 etc/gshadow*
-#chmod +r usr/bin/sudo
-#chmod +r usr/bin/sudoreplay
-
-mkdir -p "${ORIGIN_DIR}"/x64
-tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${ORIGIN_DIR}"/x64/install.tar.gz ./*
+cd "${build_dir}"
+mkdir -p "${origin_dir}"/x64
+tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${origin_dir}"/x64/install.tar.gz ./*
 
 echo "##[section] go home"
-cd "${ORIGIN_DIR}"
+cd "${origin_dir}"
 
