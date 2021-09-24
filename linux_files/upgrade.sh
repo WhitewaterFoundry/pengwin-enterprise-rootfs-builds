@@ -18,6 +18,8 @@ fi
 
 echo -n -e '\033]9;4;3;100\033\\'
 
+sudo yum -y update
+
 # Update the release and main startup script files
 sudo curl -L -f "${base_url}/linux_files/00-wle.sh" -o /etc/profile.d/00-wle.sh
 
