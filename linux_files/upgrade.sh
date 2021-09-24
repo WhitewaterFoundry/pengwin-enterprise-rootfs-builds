@@ -18,8 +18,6 @@ fi
 
 echo -n -e '\033]9;4;3;100\033\\'
 
-#enable wslu repo
-sudo yum-config-manager --add-repo https://download.opensuse.org/repositories/home:/wslutilities/ScientificLinux_7/home:wslutilities.repo
 sudo yum -y update
 
 # Update the release and main startup script files

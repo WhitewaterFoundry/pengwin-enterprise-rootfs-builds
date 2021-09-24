@@ -14,8 +14,8 @@ setup_display() {
     # enable external x display for WSL 2
 
     route_exec=$(wslpath 'C:\Windows\system32\route.exe')
-    route_exec_path=$(command -v route.exe >/dev/null 2>&1)
-    if ($?); then
+
+    if route_exec_path=$(command -v route.exe 2>/dev/null) ; then
       route_exec="${route_exec_path}"
     fi
 
