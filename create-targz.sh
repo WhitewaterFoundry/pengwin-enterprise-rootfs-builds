@@ -66,7 +66,7 @@ cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
 cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
 cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
 chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
-ln -s "${build_dir}"/usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
+ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
 
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
