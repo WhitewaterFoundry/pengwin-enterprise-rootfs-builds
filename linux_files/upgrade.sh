@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# If WSL1 and fake sudo is installed, then execute the script with su
+if [[ -z "${WSL2}" && "$(sudo bash -c 'echo "$USER"')" != "root" ]]; then
+  su -c /usr/local/bin/upgrade.sh
+fi
+
 base_url="https://raw.githubusercontent.com/WhitewaterFoundry/pengwin-enterprise-rootfs-builds/master"
 sha256sum /usr/local/bin/upgrade.sh >/tmp/sum.txt
 sudo curl -L -f "${base_url}/linux_files/upgrade.sh" -o /usr/local/bin/upgrade.sh
