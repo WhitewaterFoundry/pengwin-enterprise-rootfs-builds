@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # If WSL1 and fake sudo is installed, then execute the script with su
-if [[ -z "${WSL2}" && "$(sudo bash -c 'echo "$USER"')" != "root" ]]; then
+if [[ -z "${WSL2}" && "$(sudo bash -c 'echo "$(whoami)"')" != "root" ]]; then
   su -c /usr/local/bin/upgrade.sh
 fi
 
