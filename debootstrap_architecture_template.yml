@@ -6,27 +6,6 @@ jobs:
     AWS_INSTANCE_ID: ${{ parameters.aws_instance_id }}
 
   steps:
-
-  # - task: DownloadSecureFile@1
-  #   name: awsCredentials
-  #   inputs:
-  #     secureFile: 'credentials'
-
-  # - task: DownloadSecureFile@1
-  #   name: awsConfig
-  #   inputs:
-  #     secureFile: 'config'
-
-  # - script: |
-  #     mkdir -p "${HOME}/.aws"
-  #     cp "$(awsCredentials.secureFilePath)" "${HOME}/.aws/credentials"
-  #     cp "$(awsConfig.secureFilePath)" "${HOME}/.aws/config"
-  #   displayName: 'Copy credentials'
-
-  # - script: |
-  #     aws ec2 start-instances --instance-ids $(AWS_INSTANCE_ID)
-  #   displayName: 'Start instance'
-
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure subscription 1(cab104b5-7437-4adb-8ce9-cc164ab9d78c)'
@@ -47,14 +26,6 @@ jobs:
     ARCH: ${{ parameters.arch }}
     ARCHDIR: ${{ parameters.arch_dir }}
   steps:
-
-#  - script: |
-#      sudo umount --quiet /dev/nvme1n1
-#      sudo mkfs -t xfs -f /dev/nvme1n1
-#      sudo mount /dev/nvme1n1 /tmp
-#      sudo chown -R fedora:fedora /tmp
-#      sudo chmod -R 777 /tmp
-#    displayName: 'Preparing'
 
   - script: time sudo bash create-targz.sh $(ARCH) "/mnt"
     displayName: 'Build image'
