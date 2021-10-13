@@ -17,8 +17,8 @@ rm -r /tmp/sum.txt
 
 # the script has changed? run the newer one
 if [ ${changed} -eq 1 ]; then
-  echo Running the updated script
-  bash /usr/local/bin/upgrade.sh
+  echo 'The script has been updated please, run it again with $ upgrade.sh'
+  
   exit 0
 fi
 
