@@ -13,7 +13,7 @@ fi
 echo -n -e '\033]9;4;3;100\033\\'
 
 sudo rm -f /var/lib/rpm/.rpm.lock
-sudo yum -y update --nogpgcheck
+sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update the release and main startup script files
