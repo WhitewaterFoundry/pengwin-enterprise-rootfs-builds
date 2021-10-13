@@ -23,4 +23,5 @@ sudo curl -L -f "${base_url}/linux_files/00-wle.sh" -o /etc/profile.d/00-wle.sh
 sudo mkdir -p /etc/fonts
 sudo curl -L -f "${base_url}/linux_files/local.conf" -o /etc/fonts/local.conf
 
+echo test
 echo -n -e '\033]9;4;0;100\033\\'
