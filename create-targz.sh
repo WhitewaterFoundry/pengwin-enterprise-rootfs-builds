@@ -1,69 +1,82 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
-#declare variables
-ORIGINDIR=$(pwd)
-TMPDIR=$(mktemp -d)
-BUILDDIR=$(mktemp -d)
-INSTALLISO=${ORIGINDIR}/install.iso
-INSTALL_TAR=/tmp/install.tar.gz
-
-#enterprise boot ISO
-BOOTISO="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
-
-#enterprise Docker kickstart file
-KSFILE="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-7.ks"
-
-#go to our temporary directory
-cd "$TMPDIR"
-
-echo "##[section] make sure we are up to date"
-sudo yum -y update
-
-echo "##[section] get livemedia-creator dependencies"
-sudo yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
-
-#get anaconda dependencies
-#sudo yum -y install anaconda anaconda-tui
-
-echo "##[section] restart libvirtd for good measure"
-sudo systemctl restart libvirtd
-
-echo "##[section] download enterprise boot ISO"
-if [[ ! -f ${INSTALLISO} ]] ; then
-  sudo curl $BOOTISO -o "${INSTALLISO}"
+if [[ ${USER} != "root" ]]; then
+  echo "This script must be run with root"
+  exit 1
 fi
-echo "##[section] download enterprise Docker kickstart file"
-curl $KSFILE -o install.ks
 
-rm -f "${INSTALL_TAR}"
-
-echo "##[section] build intermediary rootfs tar"
-sudo livemedia-creator --make-tar --iso="${INSTALLISO}" --image-name=install.tar.gz --ks=install.ks --releasever "7" --vcpus 2 --compression gzip --tmp /tmp
-
-echo "##[section] open up the tar into our build directory"
-tar -xvzf "${INSTALL_TAR}" -C "${BUILDDIR}"
-
-echo "##[section] copy some custom files into our build directory"
-sudo cp "${ORIGINDIR}"/linux_files/wsl.conf "${BUILDDIR}"/etc/wsl.conf
-sudo mkdir "${BUILDDIR}"/etc/fonts
-sudo cp "${ORIGINDIR}"/linux_files/local.conf "${BUILDDIR}"/etc/fonts/local.conf
-sudo cp "${ORIGINDIR}"/linux_files/DB_CONFIG "${BUILDDIR}"/var/lib/rpm/
-sudo cp "${ORIGINDIR}"/linux_files/00-wle.sh "${BUILDDIR}"/etc/profile.d/
-sudo cp "${ORIGINDIR}"/linux_files/upgrade.sh "${BUILDDIR}"/usr/local/bin/upgrade.sh
-sudo chmod +x "${BUILDDIR}"/usr/local/bin/upgrade.sh
-
-echo "##[section] re-build our tar image"
-cd "${BUILDDIR}"
-mkdir -p "${ORIGINDIR}"/x64
-tar --ignore-failed-read -czvf "${ORIGINDIR}"/x64/install.tar.gz *
-
-echo "##[section] go home"
-cd "${ORIGINDIR}"
+#declare variables
+origin_dir=$(pwd)
+tmp_dir=${2:-$(mktemp -d)}
+build_dir=${tmp_dir}/dist
+dest_dir=${tmp_dir}/dest
+install_iso=${tmp_dir}/install.iso
+install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
-sudo rm -r "${BUILDDIR}"
-sudo rm -r "${TMPDIR}"
-sudo rm "${INSTALLISO}"
-sudo rm "${INSTALL_TAR}"
+rm -rf "${build_dir}"
+rm -rf "${dest_dir}"
+
+mkdir -p "${dest_dir}"
+mkdir -p "${build_dir}"
+
+#enterprise boot ISO
+boot_iso="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
+
+#enterprise Docker kickstart file
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-7.ks"
+
+#go to our temporary directory
+cd "$tmp_dir"
+
+echo "##[section] make sure we are up to date"
+yum -y update
+
+echo "##[section] get livemedia-creator dependencies"
+yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
+
+#get anaconda dependencies
+#yum -y install anaconda anaconda-tui
+
+echo "##[section] restart libvirtd for good measure"
+systemctl restart libvirtd || echo "Running without SystemD"
+
+echo "##[section] download enterprise boot ISO"
+if [[ ! -f ${install_iso} ]]; then
+  curl $boot_iso -o "${install_iso}"
+fi
+echo "##[section] download enterprise Docker kickstart file"
+curl $ks_file -o install.ks
+
+rm -f "${install_tar_gz}"
+
+echo "##[section] build intermediary rootfs tar"
+processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
+ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "7" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${dest_dir}"
+unset processor_count
+unset ram
+
+echo "##[section] open up the tar into our build directory"
+tar -xf "${install_tar_gz}" -C "${build_dir}"
+
+echo "##[section] copy some custom files into our build directory"
+cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
+mkdir "${build_dir}"/etc/fonts
+cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
+cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
+cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
+cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
+chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
+ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
+
+echo "##[section] re-build our tar image"
+cd "${build_dir}"
+mkdir -p "${origin_dir}"/x64
+tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${origin_dir}"/x64/install.tar.gz ./*
+
+echo "##[section] go home"
+cd "${origin_dir}"
+
