@@ -1,8 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
-set -v
 
 if [[ ${USER} != "root" ]]; then
   echo "This script must be run with root"
