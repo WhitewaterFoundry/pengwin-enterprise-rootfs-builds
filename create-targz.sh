@@ -35,7 +35,7 @@ echo "##[section] make sure we are up to date"
 yum -y update
 
 echo "##[section] get livemedia-creator dependencies"
-yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu
+yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
 
 #get anaconda dependencies
 #yum -y install anaconda anaconda-tui
@@ -45,7 +45,7 @@ systemctl restart libvirtd || echo "Running without SystemD"
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${install_iso} ]]; then
-  curl $boot_iso -o "${install_iso}"
+  curl "${boot_iso}" -o "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
 curl $ks_file -o install.ks
