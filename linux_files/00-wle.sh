@@ -45,55 +45,55 @@ main() {
     return
   fi
 
-setup_display
+  setup_display
 
-# enable external libgl if mesa is not installed
-if (command -v glxinfo >/dev/null 2>&1); then
-  unset LIBGL_ALWAYS_INDIRECT
-else
-  export LIBGL_ALWAYS_INDIRECT=1
-fi
-
-# if dbus-launch is installed then load it
-if (command -v dbus-launch >/dev/null 2>&1); then
-  eval "$(timeout 2s dbus-launch --auto-syntax)"
-fi
-
-# speed up some GUI apps like gedit
-export NO_AT_BRIDGE=1
-
-export TERM=xterm-256color
-
-# Fix 'clear' scrolling issues
-alias clear='clear -x'
-
-# Custom aliases
-alias ll='ls -al'
-
-# Check if we have Windows Path
-if (command -v cmd.exe >/dev/null 2>&1); then
-
-  # Create a symbolic link to the windows home
-
-  # Here have a issue: %HOMEDRIVE% might be using a custom set location
-  # moving cmd to where Windows is installed might help: %SYSTEMDRIVE%
-  wHomeWinPath=$(cmd.exe /c 'cd %SYSTEMDRIVE%\ && echo %HOMEDRIVE%%HOMEPATH%' 2>/dev/null | tr -d '\r')
-
-  if [ ${#wHomeWinPath} -le 3 ]; then #wHomeWinPath contains something like H:\
-    wHomeWinPath=$(cmd.exe /c 'cd %SYSTEMDRIVE%\ && echo %USERPROFILE%' 2>/dev/null | tr -d '\r')
+  # enable external libgl if mesa is not installed
+  if (command -v glxinfo >/dev/null 2>&1); then
+    unset LIBGL_ALWAYS_INDIRECT
+  else
+    export LIBGL_ALWAYS_INDIRECT=1
   fi
 
-  # shellcheck disable=SC2155
-  export WIN_HOME=$(wslpath -u "${wHomeWinPath}")
-
-  win_home_lnk=${HOME}/winhome
-  if [ ! -e "${win_home_lnk}" ]; then
-    ln -s -f "${WIN_HOME}" "${win_home_lnk}" >/dev/null 2>&1
+  # if dbus-launch is installed then load it
+  if (command -v dbus-launch >/dev/null 2>&1); then
+    eval "$(timeout 2s dbus-launch --auto-syntax)"
   fi
 
-  unset win_home_lnk
+  # speed up some GUI apps like gedit
+  export NO_AT_BRIDGE=1
 
-fi
+  export TERM=xterm-256color
+
+  # Fix 'clear' scrolling issues
+  alias clear='clear -x'
+
+  # Custom aliases
+  alias ll='ls -al'
+
+  # Check if we have Windows Path
+  if (command -v cmd.exe >/dev/null 2>&1); then
+
+    # Create a symbolic link to the windows home
+
+    # Here have a issue: %HOMEDRIVE% might be using a custom set location
+    # moving cmd to where Windows is installed might help: %SYSTEMDRIVE%
+    wHomeWinPath=$(cmd.exe /c 'cd %SYSTEMDRIVE%\ && echo %HOMEDRIVE%%HOMEPATH%' 2>/dev/null | tr -d '\r')
+
+    if [ ${#wHomeWinPath} -le 3 ]; then #wHomeWinPath contains something like H:\
+      wHomeWinPath=$(cmd.exe /c 'cd %SYSTEMDRIVE%\ && echo %USERPROFILE%' 2>/dev/null | tr -d '\r')
+    fi
+
+    # shellcheck disable=SC2155
+    export WIN_HOME=$(wslpath -u "${wHomeWinPath}")
+
+    win_home_lnk=${HOME}/winhome
+    if [ ! -e "${win_home_lnk}" ]; then
+      ln -s -f "${WIN_HOME}" "${win_home_lnk}" >/dev/null 2>&1
+    fi
+
+    unset win_home_lnk
+
+  fi
 }
 
 main "$@"
