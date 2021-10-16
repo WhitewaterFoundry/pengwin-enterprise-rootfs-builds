@@ -12,7 +12,7 @@ origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso=${tmp_dir}/install.iso
+install_iso=${tmp_dir}/install-rhel8.iso
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
