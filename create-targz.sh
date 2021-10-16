@@ -45,7 +45,7 @@ systemctl restart libvirtd || echo "Running without SystemD"
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${install_iso} ]]; then
-  curl $boot_iso -o "${install_iso}"
+  cp "${boot_iso}" "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
 curl $ks_file -o install.ks
