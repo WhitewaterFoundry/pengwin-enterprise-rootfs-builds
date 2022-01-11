@@ -23,4 +23,14 @@ sudo curl -L -f "${base_url}/linux_files/00-wle.sh" -o /etc/profile.d/00-wle.sh
 sudo mkdir -p /etc/fonts
 sudo curl -L -f "${base_url}/linux_files/local.conf" -o /etc/fonts/local.conf
 
+# Install mesa
+source /etc/os-release
+if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == '8.5' && $( sudo dnf info --installed mesa-libGL | grep -c '21.1.5-wsl' ) == 0 ]]; then
+  sudo dnf -y install 'dnf-command(versionlock)'
+  sudo dnf versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+  curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
+  sudo dnf -y install --allowerasing --nogpgcheck mesa-dri-drivers-21.1.5-wsl.el8 mesa-libGL-21.1.5-wsl.el8 glx-utils
+  sudo dnf versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+fi
+
 echo -n -e '\033]9;4;0;100\033\\'

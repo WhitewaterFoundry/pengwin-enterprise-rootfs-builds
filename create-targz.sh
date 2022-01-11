@@ -48,7 +48,7 @@ if [[ ! -f ${install_iso} ]]; then
   cp "${boot_iso}" "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
-curl $ks_file -o install.ks
+curl -L -f  $ks_file -o install.ks
 
 rm -f "${install_tar_gz}"
 
