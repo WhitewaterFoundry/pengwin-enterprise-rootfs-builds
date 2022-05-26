@@ -12,7 +12,7 @@ origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso=${tmp_dir}/install-rhel8.iso
+install_iso=${tmp_dir}/install-rhel9.iso
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
@@ -23,10 +23,10 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="/root/install8.iso"
+boot_iso="/root/install9.iso"
 
 #enterprise Docker kickstart file
-ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-9.ks"
 
 #go to our temporary directory
 cd "$tmp_dir"
