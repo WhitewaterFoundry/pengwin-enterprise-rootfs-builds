@@ -55,7 +55,7 @@ rm -f "${install_tar_gz}"
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
 ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${dest_dir}"
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
 unset processor_count
 unset ram
 
@@ -71,6 +71,17 @@ cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
 cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
 chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
 ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
+
+cp "${origin_dir}"/linux_files/start-systemd.sudoers "${tmp_dir}"/dist/etc/sudoers.d/start-systemd
+cp "${origin_dir}"/linux_files/start-systemd.sh "${tmp_dir}"/dist/usr/local/bin/start-systemd
+chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
+
+cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${tmp_dir}"/dist/etc/systemd/system/wsl2-xwayland.service
+cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${tmp_dir}"/dist/etc/systemd/system/wsl2-xwayland.socket
+ln -sf ../wsl2-xwayland.socket "${tmp_dir}"/dist/etc/systemd/system/sockets.target.wants/
+
+cp "${origin_dir}"/linux_files/systemctl3.py "${tmp_dir}"/dist/usr/local/bin/wslsystemctl
+chmod +x "${tmp_dir}"/dist/usr/local/bin/wslsystemctl
 
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
