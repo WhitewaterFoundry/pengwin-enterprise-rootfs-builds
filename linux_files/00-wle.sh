@@ -1,6 +1,27 @@
 #!/bin/sh
 
+setup_interop() {
+  # shellcheck disable=SC2155,SC2012
+  export WSL_INTEROP="$(ls -U /run/WSL/*_interop | tail -1)"
+}
+
 setup_display() {
+  if [ -n "${XRDP_SESSION}" ]; then
+    if [ -f "$HOME/.systemd.env" ]; then
+      set -a
+      . "$HOME/.systemd.env"
+      set +a
+    fi
+
+    if [ -n "$WSL_INTEROP" ]; then
+      export WSL2=1
+
+      setup_interop
+    fi
+
+    return
+  fi
+
   # check whether it is WSL1 or WSL2
   if [ -n "${WSL_INTEROP}" ]; then
     if [ -n "${DISPLAY}" ]; then
@@ -47,13 +68,6 @@ main() {
 
   setup_display
 
-  # enable external libgl if mesa is not installed
-  if (command -v glxinfo >/dev/null 2>&1); then
-    unset LIBGL_ALWAYS_INDIRECT
-  else
-    export LIBGL_ALWAYS_INDIRECT=1
-  fi
-
   # if dbus-launch is installed then load it
   if (command -v dbus-launch >/dev/null 2>&1); then
     eval "$(timeout 2s dbus-launch --auto-syntax)"
@@ -70,6 +84,26 @@ main() {
   # Custom aliases
   alias ll='ls -al'
 
+# Fix $PATH for Systemd
+SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
+
+if [ -z "$SYSTEMD_PID" ]; then
+
+  {
+    echo "PATH='$PATH'"
+    echo "WSL_DISTRO_NAME='$WSL_DISTRO_NAME'"
+    echo "WSL_INTEROP='$WSL_INTEROP'"
+    echo "WSL_SYSTEMD_EXECUTION_ARGS='$WSL_SYSTEMD_EXECUTION_ARGS'"
+  } > "$HOME/.systemd.env"
+
+elif [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" -eq 1 ] && [ -f "$HOME/.systemd.env" ]; then
+  set -a
+  . "$HOME/.systemd.env"
+  set +a
+
+  setup_interop
+fi
+
   # Check if we have Windows Path
   if [ -z "$WIN_HOME" ] && (command -v cmd.exe >/dev/null 2>&1); then
 
@@ -84,7 +118,7 @@ main() {
     fi
 
     # shellcheck disable=SC2155
-    export WIN_HOME=$(wslpath -u "${wHomeWinPath}")
+    export WIN_HOME="$(wslpath -u "${wHomeWinPath}")"
 
     win_home_lnk=${HOME}/winhome
     if [ ! -e "${win_home_lnk}" ]; then

@@ -33,4 +33,11 @@ if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == '8.5' && $( sudo dnf info --inst
   sudo dnf versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
 fi
 
+# Install support for SystemD
+
+# if machinectl is not installed then install it
+if (! command -v machinectl >/dev/null 2>&1); then
+  sudo dnf -y install systemd-container
+fi
+
 echo -n -e '\033]9;4;0;100\033\\'
