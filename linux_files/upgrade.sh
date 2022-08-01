@@ -40,20 +40,10 @@ if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == '8.5' && $( sudo dnf info --inst
 fi
 
 # Install support for SystemD
-
-# if machinectl is not installed then install it
-if (! command -v machinectl >/dev/null 2>&1); then
-  sudo yum -y install systemd-container
-fi
-
-# Upgrade Systemd
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sudoers" -o /etc/sudoers.d/start-systemd
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sh" -o /usr/local/bin/start-systemd
 sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.service" -o /etc/systemd/system/wsl2-xwayland.service
 sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.socket" -o /etc/systemd/system/wsl2-xwayland.socket
-#sudo mkdir -p /etc/systemd/system/sockets.target.wants
-#sudo ln -sf ../wsl2-xwayland.socket /etc/systemd/system/sockets.target.wants/
-
 
 sudo curl -L -f "${base_url}/linux_files/systemctl3.py" -o /usr/local/bin/wslsystemctl
 sudo chmod u+x /usr/local/bin/start-systemd
