@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 if [ -z "${WSL_INTEROP}" ]; then
-    echo "Error: start-systemd requires WSL 2."
-    echo " -> Try upgrading your distribution to WSL 2."
-    echo "Alternatively you can try wslsystemctl which provides basic functionality for WSL 1."
-    echo " -> sudo wslsystemctl start <my-service-name>"
-    exit 0
+  echo "Error: start-systemd requires WSL 2."
+  echo " -> Try upgrading your distribution to WSL 2."
+  echo "Alternatively you can try wslsystemctl which provides basic functionality for WSL 1."
+  echo " -> sudo wslsystemctl start <my-service-name>"
+  exit 0
 fi
 
 SYSTEMD_EXE="$(command -v systemd)"
@@ -46,7 +46,16 @@ if [ -z "$SYSTEMD_PID" ] || [ "$SYSTEMD_PID" -ne 1 ]; then
   done
   echo "Systemd is ready."
 
-  exec /usr/bin/nsenter --mount --pid --target "$SYSTEMD_PID" -- machinectl shell -q \
-    -E "WSL_INTEROP=${WSL_INTEROP}" -E "WSL_DISTRO_NAME=${WSL_DISTRO_NAME}" -E "WIN_HOME=${WIN_HOME}" -E "DISPLAY=${DISPLAY}" -E "PULSE_SERVER=${PULSE_SERVER}" \
-    "$SUDO_USER@.host"
+  set SUDO_USER_HOME="$(getent passwd $SUDO_USER | cut -d: -f6)"
+
+  {
+    echo "PATH='$PATH'"
+    echo "WSL_DISTRO_NAME='$WSL_DISTRO_NAME'"
+    echo "WSL_INTEROP='$WSL_INTEROP'"
+    echo "WSL_SYSTEMD_EXECUTION_ARGS='$WSL_SYSTEMD_EXECUTION_ARGS'"
+    echo "PULSE_SERVER='$PULSE_SERVER'"
+  } >"$SUDO_USER_HOME/.systemd.env"
+
+  exec /usr/bin/nsenter --mount --pid --target "$SYSTEMD_PID" -- sudo -u "$SUDO_USER" /bin/sh -c "set -a; . '$SUDO_USER_HOME/.systemd.env'; set +a; cd; bash --login"
 fi
+
