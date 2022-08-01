@@ -36,7 +36,7 @@ setup_display() {
 
     route_exec=$(wslpath 'C:\Windows\system32\route.exe')
 
-    if route_exec_path=$(command -v route.exe 2>/dev/null) ; then
+    if route_exec_path=$(command -v route.exe 2>/dev/null); then
       route_exec="${route_exec_path}"
     fi
 
@@ -84,25 +84,26 @@ main() {
   # Custom aliases
   alias ll='ls -al'
 
-# Fix $PATH for Systemd
-SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
+  # Fix $PATH for Systemd
+  SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
 
-if [ -z "$SYSTEMD_PID" ]; then
+  if [ -z "$SYSTEMD_PID" ]; then
 
-  {
-    echo "PATH='$PATH'"
-    echo "WSL_DISTRO_NAME='$WSL_DISTRO_NAME'"
-    echo "WSL_INTEROP='$WSL_INTEROP'"
-    echo "WSL_SYSTEMD_EXECUTION_ARGS='$WSL_SYSTEMD_EXECUTION_ARGS'"
-  } > "$HOME/.systemd.env"
+    {
+      echo "PATH='$PATH'"
+      echo "WSL_DISTRO_NAME='$WSL_DISTRO_NAME'"
+      echo "WSL_INTEROP='$WSL_INTEROP'"
+      echo "WSL_SYSTEMD_EXECUTION_ARGS='$WSL_SYSTEMD_EXECUTION_ARGS'"
+      echo "PULSE_SERVER='$PULSE_SERVER'"
+    } >"$HOME/.systemd.env"
 
-elif [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" -eq 1 ] && [ -f "$HOME/.systemd.env" ]; then
-  set -a
-  . "$HOME/.systemd.env"
-  set +a
+  elif [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" -eq 1 ] && [ -f "$HOME/.systemd.env" ]; then
+    set -a
+    . "$HOME/.systemd.env"
+    set +a
 
-  setup_interop
-fi
+    setup_interop
+  fi
 
   # Check if we have Windows Path
   if [ -z "$WIN_HOME" ] && (command -v cmd.exe >/dev/null 2>&1); then
@@ -118,7 +119,7 @@ fi
     fi
 
     # shellcheck disable=SC2155
-  export WIN_HOME="$(wslpath -u "${wHomeWinPath}")"
+    export WIN_HOME="$(wslpath -u "${wHomeWinPath}")"
 
     win_home_lnk=${HOME}/winhome
     if [ ! -e "${win_home_lnk}" ]; then

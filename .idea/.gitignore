@@ -1,0 +1,9 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/../../../../:\WhitewaterFoundry\pengwin-enterprise-rootfs-builds\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+/pengwin-enterprise-rootfs-builds.iml

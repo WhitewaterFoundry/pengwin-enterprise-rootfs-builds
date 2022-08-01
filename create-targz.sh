@@ -48,7 +48,7 @@ if [[ ! -f ${install_iso} ]]; then
   cp "${boot_iso}" "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
-curl -L -f  $ks_file -o install.ks
+curl -L -f $ks_file -o install.ks
 
 rm -f "${install_tar_gz}"
 
@@ -78,8 +78,8 @@ chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
 
 cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
 cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
-mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
-ln -sf ../wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/sockets.target.wants/
+#mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
+#ln -sf ../wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/sockets.target.wants/
 
 cp "${origin_dir}"/linux_files/systemctl3.py "${build_dir}"/usr/local/bin/wslsystemctl
 chmod +x "${build_dir}"/usr/local/bin/wslsystemctl

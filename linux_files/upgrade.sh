@@ -4,6 +4,12 @@ base_url="https://raw.githubusercontent.com/WhitewaterFoundry/pengwin-enterprise
 sudo curl -L -f "${base_url}/linux_files/upgrade.sh" -o /usr/local/bin/upgrade.sh
 sudo chmod +x /usr/local/bin/upgrade.sh
 
+# Do not change above this line to avoid update errors
+
+if [[ ! -L /usr/local/bin/update.sh  ]]; then
+  sudo ln -s /usr/local/bin/upgrade.sh /usr/local/bin/update.sh
+fi
+
 # If WSL1 and fake sudo is installed, then execute the script with su
 if [[ -z "${WSL2}" && "$(sudo bash -c 'echo "$(whoami)"')" != "root" ]]; then
   su -c /usr/local/bin/upgrade.sh
@@ -34,10 +40,13 @@ if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == '8.5' && $( sudo dnf info --inst
 fi
 
 # Install support for SystemD
+sudo curl -L -f "${base_url}/linux_files/start-systemd.sudoers" -o /etc/sudoers.d/start-systemd
+sudo curl -L -f "${base_url}/linux_files/start-systemd.sh" -o /usr/local/bin/start-systemd
+sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.service" -o /etc/systemd/system/wsl2-xwayland.service
+sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.socket" -o /etc/systemd/system/wsl2-xwayland.socket
 
-# if machinectl is not installed then install it
-if (! command -v machinectl >/dev/null 2>&1); then
-  sudo yum -y install systemd-container
-fi
+sudo curl -L -f "${base_url}/linux_files/systemctl3.py" -o /usr/local/bin/wslsystemctl
+sudo chmod u+x /usr/local/bin/start-systemd
+sudo chmod +x /usr/local/bin/wslsystemctl
 
 echo -n -e '\033]9;4;0;100\033\\'
