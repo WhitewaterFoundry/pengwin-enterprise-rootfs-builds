@@ -23,7 +23,7 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="/root/install8.iso"
+boot_iso="/root/install-rhel7.iso"
 
 #enterprise Docker kickstart file
 ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-7.ks"
