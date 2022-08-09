@@ -19,6 +19,17 @@ fi
 echo -n -e '\033]9;4;3;100\033\\'
 
 sudo rm -f /var/lib/rpm/.rpm.lock
+
+# Update mesa
+source /etc/os-release
+if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == *"8"* && $( sudo dnf info --installed mesa-libGL | grep -c '21.3.4-wsl' ) == 0 ]]; then
+  sudo yum -y install 'dnf-command(versionlock)'
+  sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+  curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
+  sudo yum -y install --allowerasing --nogpgcheck mesa-dri-drivers-21.3.4-wsl.el8 mesa-libGL-21.3.4-wsl.el8 glx-utils
+  sudo yum versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+fi
+
 sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
@@ -28,16 +39,6 @@ sudo curl -L -f "${base_url}/linux_files/00-wle.sh" -o /etc/profile.d/00-wle.sh
 # Add local.conf to fonts
 sudo mkdir -p /etc/fonts
 sudo curl -L -f "${base_url}/linux_files/local.conf" -o /etc/fonts/local.conf
-
-# Install mesa
-source /etc/os-release
-if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == '8.5' && $( sudo dnf info --installed mesa-libGL | grep -c '21.1.5-wsl' ) == 0 ]]; then
-  sudo yum -y install 'dnf-command(versionlock)'
-  sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
-  curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
-  sudo yum -y install --allowerasing --nogpgcheck mesa-dri-drivers-21.1.5-wsl.el8 mesa-libGL-21.1.5-wsl.el8 glx-utils
-  sudo yum versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
-fi
 
 # Install support for SystemD
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sudoers" -o /etc/sudoers.d/start-systemd

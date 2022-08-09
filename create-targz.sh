@@ -31,7 +31,7 @@ ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-
 #go to our temporary directory
 cd "$tmp_dir"
 
-echo "##[section] make sure we are up to date"
+echo "##[section] make sure we are up-to-date"
 dnf -y update
 
 echo "##[section] get livemedia-creator dependencies"
