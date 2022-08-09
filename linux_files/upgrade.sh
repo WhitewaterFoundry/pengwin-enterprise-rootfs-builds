@@ -19,6 +19,16 @@ fi
 echo -n -e '\033]9;4;3;100\033\\'
 
 sudo rm -f /var/lib/rpm/.rpm.lock
+
+# Update mesa
+source /etc/os-release
+if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == '8.6' && $( sudo dnf info --installed mesa-libGL | grep -c '21.3.4-wsl' ) == 0 ]]; then
+  sudo yum -y install 'dnf-command(versionlock)'
+  sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+  sudo yum -y install --allowerasing --nogpgcheck mesa-dri-drivers-21.3.4-wsl.el8 mesa-libGL-21.3.4-wsl.el8 glx-utils
+  sudo yum versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+fi
+
 sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
