@@ -23,7 +23,7 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="https://download.rockylinux.org/pub/rocky/8.6/isos/x86_64/Rocky-8.6-x86_64-dvd1.iso"
+boot_iso="https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.6-x86_64-dvd1.iso"
 
 #enterprise Docker kickstart file
 ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rockylinux-8.ks"
@@ -31,7 +31,7 @@ ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-
 #go to our temporary directory
 cd "$tmp_dir"
 
-echo "##[section] make sure we are up to date"
+echo "##[section] make sure we are up-to-date"
 dnf -y update
 
 echo "##[section] get livemedia-creator dependencies"
