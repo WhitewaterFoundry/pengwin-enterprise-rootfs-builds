@@ -5,6 +5,9 @@ if [ -z "${WSL_INTEROP}" ]; then
   echo " -> Try upgrading your distribution to WSL 2."
   echo "Alternatively you can try wslsystemctl which provides basic functionality for WSL 1."
   echo " -> sudo wslsystemctl start <my-service-name>"
+  echo
+  echo "Press Enter to exit..."
+  read -r
   exit 0
 fi
 
