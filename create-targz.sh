@@ -81,8 +81,8 @@ cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/s
 #mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
 #ln -sf ../wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/sockets.target.wants/
 
-cp "${origin_dir}"/linux_files/systemctl3.py "${build_dir}"/usr/local/bin/wslsystemctl
-chmod +x "${build_dir}"/usr/local/bin/wslsystemctl
+cp "${origin_dir}"/linux_files/systemctl.py "${build_dir}"/usr/bin/wslsystemctl
+chmod +x "${build_dir}"/usr/bin/wslsystemctl
 
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
