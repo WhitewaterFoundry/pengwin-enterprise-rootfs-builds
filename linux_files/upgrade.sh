@@ -22,7 +22,7 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update mesa
 source /etc/os-release
-if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == *"8"* && $( sudo dnf info --installed mesa-libGL | grep -c '21.3.4-wsl' ) == 0 ]]; then
+if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == "8"* && $( sudo dnf info --installed mesa-libGL | grep -c '21.3.4-wsl' ) == 0 ]]; then
   sudo yum -y install 'dnf-command(versionlock)'
   sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
   curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
@@ -46,8 +46,17 @@ sudo curl -L -f "${base_url}/linux_files/start-systemd.sh" -o /usr/local/bin/sta
 sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.service" -o /etc/systemd/system/wsl2-xwayland.service
 sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.socket" -o /etc/systemd/system/wsl2-xwayland.socket
 
-sudo curl -L -f "${base_url}/linux_files/systemctl3.py" -o /usr/local/bin/wslsystemctl
+if [[ ${VERSION_ID} == "7"* ]]; then
+  sudo curl -L -f "${base_url}/linux_files/systemctl.py" -o /usr/bin/wslsystemctl
+  sudo chmod +x /usr/bin/wslsystemctl
+else
+  sudo curl -L -f "${base_url}/linux_files/systemctl3.py" -o /usr/bin/wslsystemctl
+  sudo curl -L -f "${base_url}/linux_files/journalctl3.py" -o /usr/bin/wsljournalctl
+
+  sudo chmod +x /usr/bin/wslsystemctl
+  sudo chmod +x /usr/bin/wsljournalctl
+fi
+
 sudo chmod u+x /usr/local/bin/start-systemd
-sudo chmod +x /usr/local/bin/wslsystemctl
 
 echo -n -e '\033]9;4;0;100\033\\'
