@@ -8,7 +8,7 @@ if [[ ${USER} != "root" ]]; then
 fi
 
 #enterprise boot ISO
-install_iso="/root/install8.iso"
+install_iso="/root/install-rhel9.iso"
 
 #declare variables
 origin_dir=$(pwd)
@@ -25,7 +25,7 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise Docker kickstart file
-ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-9.ks"
 
 #go to our temporary directory
 cd "$tmp_dir"
@@ -50,7 +50,7 @@ rm -f "${install_tar_gz}"
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
 ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "9" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
 unset processor_count
 unset ram
 
