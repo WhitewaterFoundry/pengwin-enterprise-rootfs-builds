@@ -7,12 +7,14 @@ if [[ ${USER} != "root" ]]; then
   exit 1
 fi
 
+#enterprise boot ISO
+install_iso="/root/install8.iso"
+
 #declare variables
 origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso=${tmp_dir}/install-rhel8.iso
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
@@ -21,9 +23,6 @@ rm -rf "${dest_dir}"
 
 mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
-
-#enterprise boot ISO
-boot_iso="/root/install8.iso"
 
 #enterprise Docker kickstart file
 ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
@@ -43,10 +42,6 @@ dnf -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-
 echo "##[section] restart libvirtd for good measure"
 systemctl restart libvirtd || echo "Running without SystemD"
 
-echo "##[section] download enterprise boot ISO"
-if [[ ! -f ${install_iso} ]]; then
-  cp "${boot_iso}" "${install_iso}"
-fi
 echo "##[section] download enterprise Docker kickstart file"
 curl -L -f $ks_file -o install.ks
 
