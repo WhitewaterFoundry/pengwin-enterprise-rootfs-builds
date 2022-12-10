@@ -22,7 +22,7 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update mesa
 source /etc/os-release
-if [[ ${VERSION_ID} == "8.7"* && $(sudo dnf info --installed mesa-libGL | grep -c '22.1.5-wsl') == 0 ]]; then
+if [[ ${VERSION_ID} == "8"* && $(sudo dnf info --installed mesa-libGL | grep -c '22.1.5-wsl') == 0 ]]; then
   sudo yum -y install 'dnf-command(versionlock)'
   sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
   curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
