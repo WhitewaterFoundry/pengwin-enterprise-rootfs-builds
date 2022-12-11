@@ -6,7 +6,7 @@ sudo chmod +x /usr/local/bin/upgrade.sh
 
 # Do not change above this line to avoid update errors
 
-if [[ ! -L /usr/local/bin/update.sh  ]]; then
+if [[ ! -L /usr/local/bin/update.sh ]]; then
   sudo ln -s /usr/local/bin/upgrade.sh /usr/local/bin/update.sh
 fi
 
@@ -22,11 +22,11 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update mesa
 source /etc/os-release
-if [[ -n ${WAYLAND_DISPLAY} && ${VERSION_ID} == "8"* && $( sudo dnf info --installed mesa-libGL | grep -c '21.3.4-wsl' ) == 0 ]]; then
+if [[ ${VERSION_ID} == "8"* && $(sudo dnf info --installed mesa-libGL | grep -c '22.1.5-wsl') == 0 ]]; then
   sudo yum -y install 'dnf-command(versionlock)'
   sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
   curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
-  sudo yum -y install --allowerasing --nogpgcheck mesa-dri-drivers-21.3.4-wsl.el8 mesa-libGL-21.3.4-wsl.el8 glx-utils
+  sudo yum -y install --allowerasing --nogpgcheck mesa-dri-drivers-22.1.5-wsl.el8 mesa-libGL-22.1.5-wsl.el8 glx-utils
   sudo yum versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
 fi
 
