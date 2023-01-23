@@ -58,8 +58,10 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] copy some custom files into our build directory"
+mkdir -p "${build_dir}"/var/lib/dbus
+
 cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
-mkdir "${build_dir}"/etc/fonts
+mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
 cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
 cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
