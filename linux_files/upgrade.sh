@@ -30,6 +30,14 @@ if [[ ${VERSION_ID} == "8"* && $(sudo dnf info --installed mesa-libGL | grep -c 
   sudo yum versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
 fi
 
+if [[ ${VERSION_ID} == "9"* && $(sudo dnf info --installed mesa-libGL | grep -c '22.1.5-wsl') == 0 ]]; then
+  sudo yum -y install 'dnf-command(versionlock)'
+  sudo yum versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+  curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
+  sudo yum -y install --allowerasing --nogpgcheck mesa-dri-drivers-22.1.5-wsl.el9 mesa-libGL-22.1.5-wsl.el9 glx-utils
+  sudo yum versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi
+fi
+
 sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
