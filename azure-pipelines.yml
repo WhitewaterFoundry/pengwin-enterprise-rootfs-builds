@@ -1,5 +1,5 @@
 trigger:
-- master
+- rockylinux9
 
 stages:
 - stage: amd64

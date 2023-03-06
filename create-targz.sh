@@ -12,7 +12,7 @@ origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso=${tmp_dir}/install-sl7.iso
+install_iso=${tmp_dir}/install-rockylinux9.iso
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
@@ -23,10 +23,10 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
+boot_iso="https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.1-x86_64-dvd1.iso"
 
 #enterprise Docker kickstart file
-ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-7.ks"
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rockylinux-9.ks"
 
 #go to our temporary directory
 cd "$tmp_dir"
@@ -45,7 +45,7 @@ systemctl restart libvirtd || echo "Running without SystemD"
 
 echo "##[section] download enterprise boot ISO"
 if [[ ! -f ${install_iso} ]]; then
-  curl "${boot_iso}" -o "${install_iso}"
+  curl -L -f "${boot_iso}" -o "${install_iso}"
 fi
 echo "##[section] download enterprise Docker kickstart file"
 curl -L -f $ks_file -o install.ks
@@ -54,8 +54,8 @@ rm -f "${install_tar_gz}"
 
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
-ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "7" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${dest_dir}"
+ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 * 0.75Ap" | bc -l | cut -d'.' -f1)
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "9" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
 unset processor_count
 unset ram
 
@@ -63,8 +63,10 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] copy some custom files into our build directory"
+mkdir -p "${build_dir}"/var/lib/dbus
+
 cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
-mkdir "${build_dir}"/etc/fonts
+mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
 cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
 cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
@@ -81,8 +83,10 @@ cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/s
 #mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
 #ln -sf ../wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/sockets.target.wants/
 
-cp "${origin_dir}"/linux_files/systemctl.py "${build_dir}"/usr/bin/wslsystemctl
+cp "${origin_dir}"/linux_files/systemctl3.py "${build_dir}"/usr/bin/wslsystemctl
 chmod +x "${build_dir}"/usr/bin/wslsystemctl
+cp "${origin_dir}"/linux_files/journalctl3.py "${build_dir}"/usr/bin/wsljournalctl
+chmod +x "${build_dir}"/usr/bin/wsljournalctl
 
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
