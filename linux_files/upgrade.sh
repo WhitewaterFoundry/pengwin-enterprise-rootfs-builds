@@ -38,6 +38,12 @@ for (( i = 0; i < length; i++ )); do
   fi
 done
 
+if [[ $(id | grep -c video) == 0 ]]; then
+  sudo /usr/sbin/groupadd -g 44 wsl-video
+  sudo /usr/sbin/usermod -aG wsl-video "$(whoami)"
+  sudo /usr/sbin/usermod -aG video "$(whoami)"
+fi
+
 sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
