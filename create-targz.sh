@@ -23,7 +23,7 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-8.7-x86_64-dvd1.iso"
+boot_iso="https://download.rockylinux.org/pub/rocky/8/isos/x86_64/Rocky-x86_64-dvd.iso"
 
 #enterprise Docker kickstart file
 ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rockylinux-8.ks"
