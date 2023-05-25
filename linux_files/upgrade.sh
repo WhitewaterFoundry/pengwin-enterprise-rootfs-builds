@@ -6,7 +6,7 @@ sudo chmod +x /usr/local/bin/upgrade.sh
 
 # Do not change above this line to avoid update errors
 
-if [[ ! -L /usr/local/bin/update.sh  ]]; then
+if [[ ! -L /usr/local/bin/update.sh ]]; then
   sudo ln -s /usr/local/bin/upgrade.sh /usr/local/bin/update.sh
 fi
 
@@ -23,7 +23,7 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 # Update mesa
 source /etc/os-release
 
-declare -a mesa_version=('22.3.0-wsl2' '22.3.0-wsl2')
+declare -a mesa_version=('22.3.0-wsl3' '22.3.0-wsl2')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
 

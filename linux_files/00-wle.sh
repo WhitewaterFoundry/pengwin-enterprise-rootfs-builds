@@ -113,7 +113,7 @@ main() {
 
   if [ -z "$SYSTEMD_PID" ]; then
 
-  save_environment
+    save_environment
 
   elif [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" -eq 1 ] && [ -f "$HOME/.systemd.env" ]; then
     set -a
