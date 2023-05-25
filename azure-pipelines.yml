@@ -1,6 +1,3 @@
-trigger:
-- rockylinux8
-
 stages:
 - stage: amd64
   jobs:
