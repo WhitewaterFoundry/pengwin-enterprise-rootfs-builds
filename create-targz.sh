@@ -7,14 +7,13 @@ if [[ ${USER} != "root" ]]; then
   exit 1
 fi
 
-#enterprise boot ISO
-install_iso="/root/install8.iso"
-
 #declare variables
+enterprise_version=8
 origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
+install_iso="/root/install${enterprise_version}.iso"
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
@@ -25,7 +24,7 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise Docker kickstart file
-ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-8.ks"
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-${enterprise_version}.ks"
 
 #go to our temporary directory
 cd "$tmp_dir"
@@ -50,7 +49,7 @@ rm -f "${install_tar_gz}"
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
 ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "8" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
 unset processor_count
 unset ram
 
@@ -58,8 +57,10 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] copy some custom files into our build directory"
+mkdir -p "${build_dir}"/var/lib/dbus
+
 cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
-mkdir "${build_dir}"/etc/fonts
+mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
 cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
 cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
