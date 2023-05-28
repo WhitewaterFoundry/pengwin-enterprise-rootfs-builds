@@ -8,11 +8,12 @@ if [[ ${USER} != "root" ]]; then
 fi
 
 #declare variables
+enterprise_version=7
 origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso=${tmp_dir}/install-sl7.iso
+install_iso=${tmp_dir}/install-sl${enterprise_version}.iso
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
@@ -23,22 +24,22 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="http://ftp1.scientificlinux.org/linux/scientific/7x/x86_64/os/images/boot.iso"
+boot_iso="http://ftp1.scientificlinux.org/linux/scientific/${enterprise_version}x/x86_64/os/images/boot.iso"
 
 #enterprise Docker kickstart file
-ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-7.ks"
+ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-${enterprise_version}.ks"
 
 #go to our temporary directory
 cd "$tmp_dir"
 
 echo "##[section] make sure we are up-to-date"
-yum -y update
+dnf -y update
 
 echo "##[section] get livemedia-creator dependencies"
-yum -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
+dnf -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
 
 #get anaconda dependencies
-#yum -y install anaconda anaconda-tui
+#dnf -y install anaconda anaconda-tui
 
 echo "##[section] restart libvirtd for good measure"
 systemctl restart libvirtd || echo "Running without SystemD"
@@ -55,7 +56,7 @@ rm -f "${install_tar_gz}"
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
 ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "7" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${dest_dir}"
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus ${processor_count} --ram=${ram} --compression gzip --tmp "${dest_dir}"
 unset processor_count
 unset ram
 
@@ -63,6 +64,8 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] copy some custom files into our build directory"
+mkdir -p "${build_dir}"/var/lib/dbus
+
 cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
 mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
