@@ -34,27 +34,27 @@ function setup_interop() {
 #  None
 #######################################
 function main() {
-if [ -z "${WSL_INTEROP}" ]; then
-  echo "Error: start-systemd requires WSL 2."
-  echo " -> Try upgrading your distribution to WSL 2."
-  echo "Alternatively you can try wslsystemctl which provides basic functionality for WSL 1."
-  echo " -> sudo wslsystemctl start <my-service-name>"
-  echo
-  echo "Press Enter to exit..."
-  read -r
-  exit 0
-fi
+  if [ -z "${WSL_INTEROP}" ]; then
+    echo "Error: start-systemd requires WSL 2."
+    echo " -> Try upgrading your distribution to WSL 2."
+    echo "Alternatively you can try wslsystemctl which provides basic functionality for WSL 1."
+    echo " -> sudo wslsystemctl start <my-service-name>"
+    echo
+    echo "Press Enter to exit..."
+    read -r
+    exit 0
+  fi
 
   # shellcheck disable=SC2155
   local systemd_exe="$(command -v systemd)"
 
   if [ -z "${systemd_exe}" ]; then
-  if [ -x "/usr/lib/systemd/systemd" ]; then
+    if [ -x "/usr/lib/systemd/systemd" ]; then
       systemd_exe="/usr/lib/systemd/systemd"
-  else
+    else
       systemd_exe="/lib/systemd/systemd"
+    fi
   fi
-fi
 
   systemd_exe="${systemd_exe} --unit=multi-user.target" # snapd requires multi-user.target not basic.target
 
@@ -78,29 +78,29 @@ fi
     fi
 
     if [ -z "${systemd_pid}" ]; then
-    env -i /usr/bin/unshare --fork --mount-proc --pid --propagation shared -- sh -c "
+      env -i /usr/bin/unshare --fork --mount-proc --pid --propagation shared -- sh -c "
       mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
       exec ${systemd_exe}
       " &
       while [ -z "${systemd_pid}" ]; do
         systemd_pid="$(ps -C systemd -o pid= | head -n1)"
-      sleep 1
-    done
-  fi
+        sleep 1
+      done
+    fi
 
     local is_systemd_ready_cmd="/usr/bin/nsenter --mount --pid --target ${systemd_pid} -- systemctl is-system-running"
     # shellcheck disable=SC2155
     local wait_msg="$(${is_systemd_ready_cmd} 2>&1)"
     if [ "${wait_msg}" = "initializing" ] || [ "${wait_msg}" = "starting" ] || [ "${wait_msg}" = "Failed to connect to bus: No such file or directory" ]; then
-    echo "Waiting for systemd to finish booting"
-  fi
+      echo "Waiting for systemd to finish booting"
+    fi
     while [ "${wait_msg}" = "initializing" ] || [ "${wait_msg}" = "starting" ] || [ "${wait_msg}" = "Failed to connect to bus: No such file or directory" ]; do
-    echo -n "."
-    sleep 1
+      echo -n "."
+      sleep 1
       wait_msg="$(${is_systemd_ready_cmd} 2>&1)"
-  done
+    done
 
-  {
+    {
       echo "PATH='${PATH}'"
       echo "WSL_DISTRO_NAME='${WSL_DISTRO_NAME}'"
       echo "WSL_INTEROP='${WSL_INTEROP}'"
@@ -112,7 +112,7 @@ fi
     exec /usr/bin/nsenter --mount --pid --target "${systemd_pid}" -- sudo -u "${SUDO_USER}" /bin/sh -c "set -a; . '${sudo_user_home}/${systemd_environment}'; set +a; cd; $(getent passwd "${SUDO_USER}" | cut -d: -f7) --login"
   else
     exec sudo -u "${SUDO_USER}" /bin/sh -c "cd; $(getent passwd "${SUDO_USER}" | cut -d: -f7) --login"
-fi
+  fi
 }
 
 main "$@"
