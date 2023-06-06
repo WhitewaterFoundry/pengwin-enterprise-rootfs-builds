@@ -73,6 +73,9 @@ setup_display() {
 
     # Export an environment variable for helping other processes
     unset WSL2
+
+    # Ensure that hardware acceleration is not "used" in WSL1
+    export LIBGL_ALWAYS_SOFTWARE=1
   fi
 }
 
@@ -104,9 +107,11 @@ main() {
   alias winget='powershell.exe winget'
   alias wsl='wsl.exe'
 
-  #Setup video acceleration
-  export VDPAU_DRIVER=d3d12
-  export LIBVA_DRIVER_NAME=d3d12
+  if [ -n "${WSL2}" ]; then
+    #Setup video acceleration
+    export VDPAU_DRIVER=d3d12
+    export LIBVA_DRIVER_NAME=d3d12
+  fi
 
   # Fix $PATH for Systemd
   SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
