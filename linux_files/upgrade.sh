@@ -23,7 +23,7 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 # Update mesa
 source /etc/os-release
 
-declare -a mesa_version=('22.3.0-wsl3' '22.3.0-wsl2')
+declare -a mesa_version=('22.3.0-wsl3' '23.1.4-wsl')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
 
@@ -50,10 +50,15 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update the release and main startup script files
 sudo curl -L -f "${base_url}/linux_files/00-wle.sh" -o /etc/profile.d/00-wle.sh
+sudo curl -L -f "${base_url}/linux_files/bash-prompt-wsl.sh" -o /etc/profile.d/bash-prompt-wsl.sh
 
 # Add local.conf to fonts
 sudo mkdir -p /etc/fonts
 sudo curl -L -f "${base_url}/linux_files/local.conf" -o /etc/fonts/local.conf
+
+# Install additional scripts
+sudo curl -L -f "${base_url}/linux_files/install-desktop.sh" -o /usr/local/bin/install-desktop.sh
+sudo chmod +x /usr/local/bin/install-desktop.sh
 
 # Install support for SystemD
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sudoers" -o /etc/sudoers.d/start-systemd
