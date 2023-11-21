@@ -24,7 +24,7 @@ export NEWT_COLORS='
 
 readonly PENGWIN_SETUP_TITLE="Pengwin Setup"
 
-hostname=$(whiptail --backtitle "${PENGWIN_SETUP_TITLE}" --title "Enter the desired hostname that will identify this distribution instead of IP address" --inputbox "hostname: " 8 100 "fedoraremix" 3>&1 1>&2 2>&3)
+hostname=$(whiptail --backtitle "${PENGWIN_SETUP_TITLE}" --title "Enter the desired hostname that will identify this distribution instead of IP address" --inputbox "hostname: " 8 100 "pengwinent" 3>&1 1>&2 2>&3)
 if [[ -z ${hostname} ]]; then
   exit 1
 fi
@@ -60,6 +60,11 @@ fi
 
 echo "${desktop_choice}"
 
+source /etc/os-release
+version_major=$(echo "${VERSION_ID}" | cut -d '.' -f 1)
+sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-"${version_major}".noarch.rpm
+sudo dnf install -y epel-release
+
 sudo dnf -y group install "${desktop_choice}"
 
 declare -A desktop_execs
@@ -75,7 +80,7 @@ chmod +x "${HOME}"/.xsession
 
 sudo localectl set-locale LANG="en_US.UTF-8"
 
-sudo dnf -y install xrdp avahi xorg-x11-xinit-session
+sudo dnf -y install xrdp avahi xorg-x11-xinit-session tigervnc-server
 sudo systemctl enable xrdp
 sudo systemctl enable avahi-daemon
 

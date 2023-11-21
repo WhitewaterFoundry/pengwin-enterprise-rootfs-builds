@@ -31,6 +31,9 @@ setup_display() {
       setup_interop
     fi
 
+    unset WAYLAND_DISPLAY
+    rm -f /mnt/wslg/runtime-dir/wayland*
+
     return
   fi
 
