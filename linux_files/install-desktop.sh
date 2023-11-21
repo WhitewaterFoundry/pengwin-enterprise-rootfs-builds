@@ -40,11 +40,9 @@ if [[ -z ${listen_port} ]]; then
 fi
 
 desktop_choice=$(
-  whiptail --backtitle "${PENGWIN_SETUP_TITLE}"  --title "Desktop Selection" --radiolist --separate-output "Choose your desired Desktop Environment\n[SPACE to select, ENTER to confirm]:" 12 45 4 \
+  whiptail --backtitle "${PENGWIN_SETUP_TITLE}"  --title "Desktop Selection" --radiolist --separate-output "Choose your desired Desktop Environment\n[SPACE to select, ENTER to confirm]:" 12 45 2 \
     "GNOME" "GNOME Desktop Environment   " on \
-    "KDE" "KDE Plasma Desktop" off \
     "Xfce" "XFCE 4 Desktop" off \
-    "LXDE" "LXDE Desktop" off 3>&1 1>&2 2>&3
 )
 
 exit_status=$?
@@ -79,8 +77,6 @@ echo "exec $(command -v "${desktop_exec}")">"${HOME}"/.xsession
 chmod +x "${HOME}"/.xsession
 
 sudo localectl set-locale LANG="en_US.UTF-8"
-
-
 
 sudo dnf -y install xrdp avahi xorg-x11-xinit-session tigervnc-server
 sudo systemctl enable xrdp
