@@ -13,7 +13,7 @@ origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso="/root/install${enterprise_version}.iso"
+install_iso="/root/install-rhel${enterprise_version}.iso"
 install_tar_gz=${dest_dir}/install.tar.gz
 
 echo "##[section] clean up"
@@ -48,7 +48,7 @@ rm -f "${install_tar_gz}"
 
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
-ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 / 2Ap" | bc -l | cut -d'.' -f1)
+ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 * 0.75Ap" | bc -l | cut -d'.' -f1)
 livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
 unset processor_count
 unset ram
@@ -64,7 +64,13 @@ mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
 cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
 cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
+cp "${origin_dir}"/linux_files/bash-prompt-wsl.sh "${build_dir}"/etc/profile.d/
+
 cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
+
+cp "${origin_dir}"/linux_files/install-desktop.sh "${build_dir}"/usr/local/bin/install-desktop.sh
+chmod +x "${build_dir}"/usr/local/bin/install-desktop.sh
+
 chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
 ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
 
