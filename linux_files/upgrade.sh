@@ -46,7 +46,7 @@ if [[ $(id | grep -c video) == 0 ]]; then
   sudo /usr/sbin/usermod -aG video "$(whoami)"
 fi
 
-if [[ ${VERSION_ID} == '8'* ]]; then
+if [[ $(dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
   sudo dnf versionlock add llvm-libs
 fi
 
