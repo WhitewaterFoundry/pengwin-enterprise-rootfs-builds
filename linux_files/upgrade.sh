@@ -46,6 +46,10 @@ if [[ $(id | grep -c video) == 0 ]]; then
   sudo /usr/sbin/usermod -aG video "$(whoami)"
 fi
 
+if [[ ${VERSION_ID} == '8'* ]]; then
+  sudo dnf versionlock add llvm-libs
+fi
+
 sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
