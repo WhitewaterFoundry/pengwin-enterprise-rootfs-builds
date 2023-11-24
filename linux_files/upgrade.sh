@@ -23,7 +23,8 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 # Update mesa
 source /etc/os-release
 
-declare -a mesa_version=('22.3.0-wsl3' '22.3.0-wsl2')
+declare -a mesa_version=('22.3.0-wsl3' '23.1.4-wsl')
+declare -a llvm_version=('15.0.7' '16.0.6')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
 
@@ -31,11 +32,11 @@ for (( i = 0; i < length; i++ )); do
 
   if [[ ${VERSION_ID} == ${target_version[i]}* && $(sudo dnf info --installed mesa-libGL | grep -c "${mesa_version[i]}") == 0 ]]; then
     sudo dnf -y install 'dnf-command(versionlock)'
-    sudo dnf versionlock delete mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
+    sudo dnf versionlock delete llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
     curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
-    sudo dnf -y install --allowerasing --nogpgcheck mesa-dri-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-vdpau-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libEGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-libgbm-"${mesa_version[i]}".el"${target_version[i]}" mesa-libxatracker-"${mesa_version[i]}".el"${target_version[i]}" mesa-vulkan-drivers-"${mesa_version[i]}".el"${target_version[i]}" glx-utils
+    sudo dnf -y install --allowerasing --nogpgcheck llvm-libs-"${llvm_version[i]}".el"${target_version[i]}" mesa-dri-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-vdpau-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libEGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-libgbm-"${mesa_version[i]}".el"${target_version[i]}" mesa-libxatracker-"${mesa_version[i]}".el"${target_version[i]}" mesa-vulkan-drivers-"${mesa_version[i]}".el"${target_version[i]}" glx-utils
     sudo dnf -y install --allowerasing --nogpgcheck libva-utils
-    sudo dnf versionlock add mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
+    sudo dnf versionlock add llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
   fi
 done
 
@@ -45,15 +46,24 @@ if [[ $(id | grep -c video) == 0 ]]; then
   sudo /usr/sbin/usermod -aG video "$(whoami)"
 fi
 
+if [[ $(dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
+  sudo dnf versionlock add llvm-libs
+fi
+
 sudo yum -y update
 sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update the release and main startup script files
 sudo curl -L -f "${base_url}/linux_files/00-wle.sh" -o /etc/profile.d/00-wle.sh
+sudo curl -L -f "${base_url}/linux_files/bash-prompt-wsl.sh" -o /etc/profile.d/bash-prompt-wsl.sh
 
 # Add local.conf to fonts
 sudo mkdir -p /etc/fonts
 sudo curl -L -f "${base_url}/linux_files/local.conf" -o /etc/fonts/local.conf
+
+# Install additional scripts
+sudo curl -L -f "${base_url}/linux_files/install-desktop.sh" -o /usr/local/bin/install-desktop.sh
+sudo chmod +x /usr/local/bin/install-desktop.sh
 
 # Install support for SystemD
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sudoers" -o /etc/sudoers.d/start-systemd
