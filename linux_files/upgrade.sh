@@ -30,13 +30,18 @@ declare -i length=${#mesa_version[@]}
 
 for (( i = 0; i < length; i++ )); do
 
-  if [[ ${VERSION_ID} == ${target_version[i]}* && $(sudo dnf info --installed mesa-libGL | grep -c "${mesa_version[i]}") == 0 ]]; then
-    sudo dnf -y install 'dnf-command(versionlock)'
-    sudo dnf versionlock delete llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
-    curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
-    sudo dnf -y install --allowerasing --nogpgcheck llvm-libs-"${llvm_version[i]}" mesa-dri-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-vdpau-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libEGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-libgbm-"${mesa_version[i]}".el"${target_version[i]}" mesa-libxatracker-"${mesa_version[i]}".el"${target_version[i]}" mesa-vulkan-drivers-"${mesa_version[i]}".el"${target_version[i]}" glx-utils
-    sudo dnf -y install --allowerasing --nogpgcheck libva-utils
-    sudo dnf versionlock add llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
+  if [[ ${VERSION_ID} == ${target_version[i]}* ]]; then
+    if [[ $(sudo dnf info --installed mesa-libGL | grep -c "${mesa_version[i]}") == 0 ]]; then
+      sudo dnf -y install 'dnf-command(versionlock)'
+      sudo dnf versionlock delete llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
+      curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
+      sudo dnf -y install --allowerasing --nogpgcheck llvm-libs-"${llvm_version[i]}" mesa-dri-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-vdpau-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libEGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-libgbm-"${mesa_version[i]}".el"${target_version[i]}" mesa-libxatracker-"${mesa_version[i]}".el"${target_version[i]}" mesa-vulkan-drivers-"${mesa_version[i]}".el"${target_version[i]}" glx-utils
+      sudo dnf -y install --allowerasing --nogpgcheck libva-utils
+      sudo dnf versionlock add llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
+
+    elif [[ $(dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
+      sudo dnf versionlock add llvm-libs
+    fi
   fi
 done
 
@@ -44,10 +49,6 @@ if [[ $(id | grep -c video) == 0 ]]; then
   sudo /usr/sbin/groupadd -g 44 wsl-video
   sudo /usr/sbin/usermod -aG wsl-video "$(whoami)"
   sudo /usr/sbin/usermod -aG video "$(whoami)"
-fi
-
-if [[ $(dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
-  sudo dnf versionlock add llvm-libs
 fi
 
 sudo yum -y update

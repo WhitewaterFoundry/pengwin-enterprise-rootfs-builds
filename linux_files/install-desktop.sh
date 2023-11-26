@@ -2,7 +2,7 @@
 
 update.sh
 
-sudo dnf -y install newt
+sudo yum -y install newt
 
 export NEWT_COLORS='
     root=lightgray,black
@@ -60,10 +60,10 @@ echo "${desktop_choice}"
 
 source /etc/os-release
 version_major=$(echo "${VERSION_ID}" | cut -d '.' -f 1)
-sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-"${version_major}".noarch.rpm
-sudo dnf install -y epel-release
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-"${version_major}".noarch.rpm
+sudo yum install -y epel-release
 
-sudo dnf -y group install "${desktop_choice}"
+sudo yum -y group install "${desktop_choice}"
 
 declare -A desktop_execs
 
@@ -78,7 +78,7 @@ chmod +x "${HOME}"/.xsession
 
 sudo localectl set-locale LANG="en_US.UTF-8"
 
-sudo dnf -y install xrdp avahi xorg-x11-xinit-session tigervnc-server
+sudo yum -y install xrdp avahi xorg-x11-xinit-session tigervnc-server
 sudo systemctl enable xrdp
 sudo systemctl enable avahi-daemon
 
