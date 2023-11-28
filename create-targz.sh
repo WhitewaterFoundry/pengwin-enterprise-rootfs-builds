@@ -71,7 +71,13 @@ mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
 cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
 cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
+cp "${origin_dir}"/linux_files/bash-prompt-wsl.sh "${build_dir}"/etc/profile.d/
+
 cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
+
+cp "${origin_dir}"/linux_files/install-desktop.sh "${build_dir}"/usr/local/bin/install-desktop.sh
+chmod +x "${build_dir}"/usr/local/bin/install-desktop.sh
+
 chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
 ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
 

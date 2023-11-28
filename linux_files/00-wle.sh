@@ -31,6 +31,9 @@ setup_display() {
       setup_interop
     fi
 
+    unset WAYLAND_DISPLAY
+    rm -f /mnt/wslg/runtime-dir/wayland*
+
     return
   fi
 
@@ -93,7 +96,6 @@ main() {
 
   # speed up some GUI apps like gedit
   export NO_AT_BRIDGE=1
-  export PS1='\[\033]133;D;$?\]\[\033\\\033]133;A\033\\\][\u@\h \W]\$ \[\033]133;B\033\\\]'
   export TERM=xterm-256color
 
   # Fix 'clear' scrolling issues
@@ -104,9 +106,11 @@ main() {
   alias winget='powershell.exe winget'
   alias wsl='wsl.exe'
 
-  #Setup video acceleration
-  export VDPAU_DRIVER=d3d12
-  export LIBVA_DRIVER_NAME=d3d12
+  if [ -n "${WSL2}" ]; then
+    #Setup video acceleration
+    export VDPAU_DRIVER=d3d12
+    export LIBVA_DRIVER_NAME=d3d12
+  fi
 
   # Fix $PATH for Systemd
   SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
