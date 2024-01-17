@@ -7,20 +7,6 @@ stages:
       agent_arch: X64
       arch_dir: x64
       aws_instance_id: i-072a16dc951b04894
-  - job: startAgent
-    pool:
-      vmImage: ubuntu-latest
-    variables:
-      AWS_INSTANCE_ID: ${{ parameters.aws_instance_id }}
-
-    steps:
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: 'Azure subscription 1(cab104b5-7437-4adb-8ce9-cc164ab9d78c)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL'
-      displayName: 'Start instance'
 
 #- stage: arm64
 #  dependsOn: []
