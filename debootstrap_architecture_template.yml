@@ -11,7 +11,7 @@ jobs:
       azureSubscription: 'Microsoft Partner Network(f09d9bd9-613b-451c-af5f-317bb659c029)'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL2'
+      inlineScript: 'az vm restart -g CreateImages -n CreateImageRHEL2'
     displayName: 'Start instance'
 
 - job: ${{ parameters.arch }}
