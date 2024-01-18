@@ -8,10 +8,10 @@ jobs:
   steps:
   - task: AzureCLI@2
     inputs:
-      azureSubscription: 'Azure subscription 1(cab104b5-7437-4adb-8ce9-cc164ab9d78c)'
+      azureSubscription: 'Microsoft Partner Network(f09d9bd9-613b-451c-af5f-317bb659c029)'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL'
+      inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL2 --no-wait'
     displayName: 'Start instance'
 
 - job: ${{ parameters.arch }}
