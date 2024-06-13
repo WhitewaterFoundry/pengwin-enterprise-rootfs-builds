@@ -7,7 +7,6 @@ stages:
       agent_arch: X64
       arch_dir: x64
       aws_instance_id: i-072a16dc951b04894
-
 #- stage: arm64
 #  dependsOn: []
 #  jobs:
