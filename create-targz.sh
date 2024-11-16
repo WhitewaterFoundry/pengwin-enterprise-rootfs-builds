@@ -78,6 +78,12 @@ cp "${origin_dir}"/linux_files/start-systemd.sudoers "${build_dir}"/etc/sudoers.
 cp "${origin_dir}"/linux_files/start-systemd.sh "${build_dir}"/usr/local/bin/start-systemd
 chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
 
+cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/local/bin/oobe.sh
+chmod +x "${build_dir}"/usr/local/bin/oobe.sh
+
+mkdir -p "${build_dir}"/usr/local/icons
+cp "${origin_dir}"/linux_files/icon.ico "${build_dir}"/usr/local/icons/pengwin-enterprise.ico
+
 cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
 cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
 #mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
@@ -91,7 +97,7 @@ chmod +x "${build_dir}"/usr/bin/wsljournalctl
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
 mkdir -p "${origin_dir}"/x64
-tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner -czf "${origin_dir}"/x64/install.tar.gz ./*
+tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner --absolute-names -c ./* | gzip --best > "${origin_dir}"/x64/install.tar.gz
 
 echo "##[section] go home"
 cd "${origin_dir}"
