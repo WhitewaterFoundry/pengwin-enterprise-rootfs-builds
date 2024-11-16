@@ -60,6 +60,7 @@ echo "##[section] copy some custom files into our build directory"
 mkdir -p "${build_dir}"/var/lib/dbus
 
 cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
+cp "${origin_dir}"/linux_files/wsl-distribution.conf "${build_dir}"/etc/wsl-distribution.conf
 mkdir -p "${build_dir}"/etc/fonts
 cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
 cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
