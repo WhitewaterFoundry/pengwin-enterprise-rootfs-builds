@@ -82,7 +82,7 @@ chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
 cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/local/bin/oobe.sh
 chmod +x "${build_dir}"/usr/local/bin/oobe.sh
 
-mkdir -p "${build_dir}"/usr/local/icons
+mkdir -p "${build_dir}"/usr/local/share/icons
 cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/local/share/icons/pengwin-enterprise.ico
 cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/local/share/icons/pengwin-enterprise.theme-dark.ico
 
