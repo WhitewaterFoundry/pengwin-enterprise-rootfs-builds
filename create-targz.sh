@@ -95,6 +95,8 @@ chmod +x "${build_dir}"/usr/bin/wslsystemctl
 cp "${origin_dir}"/linux_files/journalctl3.py "${build_dir}"/usr/bin/wsljournalctl
 chmod +x "${build_dir}"/usr/bin/wsljournalctl
 
+rm "${build_dir}"/etc/resolv.conf
+
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
 mkdir -p "${origin_dir}"/x64
