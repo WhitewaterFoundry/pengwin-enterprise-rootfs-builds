@@ -83,7 +83,8 @@ cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/local/bin/oobe.sh
 chmod +x "${build_dir}"/usr/local/bin/oobe.sh
 
 mkdir -p "${build_dir}"/usr/local/icons
-cp "${origin_dir}"/linux_files/icon.ico "${build_dir}"/usr/local/icons/pengwin-enterprise.ico
+cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/local/share/icons/pengwin-enterprise.ico
+cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/local/share/icons/pengwin-enterprise.theme-dark.ico
 
 cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
 cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
