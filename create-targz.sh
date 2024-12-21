@@ -79,12 +79,13 @@ cp "${origin_dir}"/linux_files/start-systemd.sudoers "${build_dir}"/etc/sudoers.
 cp "${origin_dir}"/linux_files/start-systemd.sh "${build_dir}"/usr/local/bin/start-systemd
 chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
 
-cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/local/bin/oobe.sh
-chmod +x "${build_dir}"/usr/local/bin/oobe.sh
+cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/etc/oobe.sh
+chmod +x "${build_dir}"/etc/oobe.sh
 
-mkdir -p "${build_dir}"/usr/local/share/icons
-cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/local/share/icons/pengwin-enterprise.ico
-cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/local/share/icons/pengwin-enterprise.theme-dark.ico
+mkdir -p "${build_dir}"/usr/lib/wsl
+cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.ico
+cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.theme-dark.ico
+cp "${origin_dir}"/linux_files/terminal-profile.json "${build_dir}"/usr/lib/wsl/terminal-profile.json
 
 cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
 cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
