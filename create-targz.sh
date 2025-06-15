@@ -81,12 +81,12 @@ chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
 
 cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sudoers "${build_dir}"/etc/sudoers.d/pengwinenterprise-load-vgem-module
 cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sh "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
-chmod +x "${TMPDIR}"/dist/usr/local/bin/pengwinenterprise-load-vgem-module
-
-cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/etc/oobe.sh
-chmod +x "${build_dir}"/etc/oobe.sh
+chmod +x "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
 
 mkdir -p "${build_dir}"/usr/lib/wsl
+cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/lib/wsl/oobe.sh
+chmod +x "${build_dir}"/usr/lib/wsl/oobe.sh
+
 cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.ico
 cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.theme-dark.ico
 cp "${origin_dir}"/linux_files/terminal-profile.json "${build_dir}"/usr/lib/wsl/terminal-profile.json
