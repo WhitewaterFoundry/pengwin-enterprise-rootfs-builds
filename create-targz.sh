@@ -77,7 +77,7 @@ ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
 
 cp "${origin_dir}"/linux_files/start-systemd.sudoers "${build_dir}"/etc/sudoers.d/start-systemd
 cp "${origin_dir}"/linux_files/start-systemd.sh "${build_dir}"/usr/local/bin/start-systemd
-chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
+chmod +x "${build_dir}"/usr/local/bin/start-systemd
 
 cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sudoers "${build_dir}"/etc/sudoers.d/pengwinenterprise-load-vgem-module
 cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sh "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
@@ -100,19 +100,6 @@ cp "${origin_dir}"/linux_files/systemctl3.py "${build_dir}"/usr/bin/wslsystemctl
 chmod +x "${build_dir}"/usr/bin/wslsystemctl
 cp "${origin_dir}"/linux_files/journalctl3.py "${build_dir}"/usr/bin/wsljournalctl
 chmod +x "${build_dir}"/usr/bin/wsljournalctl
-
-echo "##[section] Masking conflicting services"
-systemd-nspawn -q --resolv-conf="replace-host" -D "${TMPDIR}"/dist --pipe /bin/bash <<EOF
-ln -sf /dev/null /etc/systemd/system/systemd-resolved.service
-ln -sf /dev/null /etc/systemd/system/systemd-networkd.service
-ln -sf /dev/null /etc/systemd/system/NetworkManager.service
-ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup.service
-ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.service
-ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.timer
-ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev-early.service
-ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev.service
-ln -sf /dev/null /etc/systemd/system/tmp.mount
-EOF
 
 rm "${build_dir}"/etc/resolv.conf
 
