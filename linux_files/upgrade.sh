@@ -28,7 +28,7 @@ declare -a llvm_version=('17.0.6' '17.0.6')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
 
-for (( i = 0; i < length; i++ )); do
+for ((i = 0; i < length; i++)); do
 
   if [[ ${VERSION_ID} == ${target_version[i]}* ]]; then
     if [[ $(sudo dnf info --installed mesa-libGL | grep -c "${mesa_version[i]}") == 0 ]]; then
@@ -49,9 +49,10 @@ if [[ $(id | grep -c video) == 0 ]]; then
   sudo /usr/sbin/groupadd -g 44 wsl-video
   sudo /usr/sbin/usermod -aG wsl-video "$(whoami)"
   sudo /usr/sbin/usermod -aG video "$(whoami)"
+  sudo /usr/sbin/usermod -aG render "$(whoami)"
 fi
 
-sudo yum -y update
+sudo yum -y update --nogpgcheck
 sudo rm -f /var/lib/rpm/.rpm.lock
 
 # Update the release and main startup script files
@@ -69,8 +70,28 @@ sudo chmod +x /usr/local/bin/install-desktop.sh
 # Install support for SystemD
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sudoers" -o /etc/sudoers.d/start-systemd
 sudo curl -L -f "${base_url}/linux_files/start-systemd.sh" -o /usr/local/bin/start-systemd
-sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.service" -o /etc/systemd/system/wsl2-xwayland.service
-sudo curl -L -f "${base_url}/linux_files/wsl2-xwayland.socket" -o /etc/systemd/system/wsl2-xwayland.socket
+
+# Configure vgem module loading
+sudo curl -L -f "${base_url}/linux_files/pengwinenterprise-load-vgem-module.sudoers" -o /etc/sudoers.d/pengwinenterprise-load-vgem-module
+sudo curl -L -f "${base_url}/linux_files/pengwinenterprise-load-vgem-module.sh" -o /usr/local/bin/pengwinenterprise-load-vgem-module
+sudo chmod +x /usr/local/bin/pengwinenterprise-load-vgem-module
+
+if [ -f /etc/systemd/system/wsl2-xwayland.service ]; then
+  sudo rm -f /etc/systemd/system/wsl2-xwayland.service
+  sudo rm -f /etc/systemd/system/wsl2-xwayland.socket
+  sudo rm -f /etc/systemd/system/sockets.target.wants/wsl2-xwayland.socket
+fi
+
+# Mask conflicting services
+sudo ln -sf /dev/null /etc/systemd/system/systemd-resolved.service
+sudo ln -sf /dev/null /etc/systemd/system/systemd-networkd.service
+sudo ln -sf /dev/null /etc/systemd/system/NetworkManager.service
+sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup.service
+sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.service
+sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.timer
+sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev-early.service
+sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev.service
+sudo ln -sf /dev/null /etc/systemd/system/tmp.mount
 
 if [[ ${VERSION_ID} == "7"* ]]; then
   sudo curl -L -f "${base_url}/linux_files/systemctl.py" -o /usr/bin/wslsystemctl

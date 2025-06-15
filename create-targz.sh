@@ -79,6 +79,10 @@ cp "${origin_dir}"/linux_files/start-systemd.sudoers "${build_dir}"/etc/sudoers.
 cp "${origin_dir}"/linux_files/start-systemd.sh "${build_dir}"/usr/local/bin/start-systemd
 chmod +x "${tmp_dir}"/dist/usr/local/bin/start-systemd
 
+cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sudoers "${build_dir}"/etc/sudoers.d/pengwinenterprise-load-vgem-module
+cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sh "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
+chmod +x "${TMPDIR}"/dist/usr/local/bin/pengwinenterprise-load-vgem-module
+
 cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/etc/oobe.sh
 chmod +x "${build_dir}"/etc/oobe.sh
 
@@ -87,8 +91,8 @@ cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/lib/wsl
 cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.theme-dark.ico
 cp "${origin_dir}"/linux_files/terminal-profile.json "${build_dir}"/usr/lib/wsl/terminal-profile.json
 
-cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
-cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
+#cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
+#cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
 #mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
 #ln -sf ../wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/sockets.target.wants/
 
@@ -97,13 +101,25 @@ chmod +x "${build_dir}"/usr/bin/wslsystemctl
 cp "${origin_dir}"/linux_files/journalctl3.py "${build_dir}"/usr/bin/wsljournalctl
 chmod +x "${build_dir}"/usr/bin/wsljournalctl
 
+echo "##[section] Masking conflicting services"
+systemd-nspawn -q --resolv-conf="replace-host" -D "${TMPDIR}"/dist --pipe /bin/bash <<EOF
+ln -sf /dev/null /etc/systemd/system/systemd-resolved.service
+ln -sf /dev/null /etc/systemd/system/systemd-networkd.service
+ln -sf /dev/null /etc/systemd/system/NetworkManager.service
+ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup.service
+ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.service
+ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.timer
+ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev-early.service
+ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev.service
+ln -sf /dev/null /etc/systemd/system/tmp.mount
+EOF
+
 rm "${build_dir}"/etc/resolv.conf
 
 echo "##[section] re-build our tar image"
 cd "${build_dir}"
 mkdir -p "${origin_dir}"/x64
-tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner --absolute-names -c ./* | gzip --best > "${origin_dir}"/x64/install.tar.gz
+tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner --absolute-names -c ./* | gzip --best >"${origin_dir}"/x64/install.tar.gz
 
 echo "##[section] go home"
 cd "${origin_dir}"
-
