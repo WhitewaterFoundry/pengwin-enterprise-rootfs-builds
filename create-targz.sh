@@ -24,7 +24,7 @@ mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
 #enterprise boot ISO
-boot_iso="http://ftp1.scientificlinux.org/linux/scientific/${enterprise_version}x/x86_64/os/images/boot.iso"
+boot_iso="http://ftp1.scientificlinux.org/linux/scientific/obsolete/${enterprise_version}x/x86_64/os/images/boot.iso"
 
 #enterprise Docker kickstart file
 ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/sl-${enterprise_version}.ks"
