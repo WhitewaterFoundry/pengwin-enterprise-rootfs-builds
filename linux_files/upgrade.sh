@@ -23,7 +23,7 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 # Update mesa
 source /etc/os-release
 
-declare -a mesa_version=('23.1.4-2_wsl' '24.2.8-2_wsl')
+declare -a mesa_version=('23.1.4-2_wsl' '24.2.8-2_wsl_2')
 declare -a llvm_version=('17.0.6' '19.1.7')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
