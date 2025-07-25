@@ -65,7 +65,6 @@ setup_display() {
     fi
 
     # enable external x display for WSL 2
-
     route_exec=$(wslpath 'C:\Windows\system32\route.exe')
 
     if route_exec_path=$(command -v route.exe 2>/dev/null); then
@@ -77,7 +76,7 @@ setup_display() {
     if [ -n "${wsl2_d_tmp}" ]; then
       export DISPLAY="${wsl2_d_tmp}":0
     else
-      wsl2_d_tmp="$(grep </etc/resolv.conf nameserver | awk '{print $2}')"
+      wsl2_d_tmp="$(ip route | grep default | awk '{print $3; exit;}')"
       export DISPLAY="${wsl2_d_tmp}":0
     fi
 

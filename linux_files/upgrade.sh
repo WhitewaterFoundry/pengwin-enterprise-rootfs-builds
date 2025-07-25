@@ -28,7 +28,7 @@ declare -a llvm_version=('17.0.6' '19.1.7')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
 
-for (( i = 0; i < length; i++ )); do
+for ((i = 0; i < length; i++)); do
 
   if [[ ${VERSION_ID} == ${target_version[i]}* ]]; then
     if [[ $(sudo dnf info --installed mesa-libGL | grep -c "${mesa_version[i]}") == 0 ]]; then
