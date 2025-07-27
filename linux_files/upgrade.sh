@@ -85,13 +85,15 @@ fi
 # Mask conflicting services
 sudo ln -sf /dev/null /etc/systemd/system/systemd-resolved.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-networkd.service
-sudo ln -sf /dev/null /etc/systemd/system/NetworkManager.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.timer
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev-early.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev.service
 sudo ln -sf /dev/null /etc/systemd/system/tmp.mount
+if [[ ${VERSION_ID} == "9"* || ${VERSION_ID} == "10"* || ${VERSION_ID} == "11"* ]]; then
+  sudo ln -sf /dev/null /etc/systemd/system/NetworkManager.service
+fi
 
 if [[ ${VERSION_ID} == "7"* ]]; then
   sudo curl -L -f "${base_url}/linux_files/systemctl.py" -o /usr/bin/wslsystemctl
