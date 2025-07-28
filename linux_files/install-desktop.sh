@@ -2,7 +2,7 @@
 
 update.sh
 
-sudo yum -y install newt
+sudo yum -y install newt ncurses dialog
 
 export NEWT_COLORS='
     root=lightgray,black
