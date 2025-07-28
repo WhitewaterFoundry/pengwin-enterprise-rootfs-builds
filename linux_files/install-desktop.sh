@@ -252,7 +252,8 @@ function configure_x_session() {
 # Configure system locale
 function configure_system_locale() {
   if ! sudo localectl set-locale "LANG=${DEFAULT_LOCALE}"; then
-    return
+    echo "Error: Failed to set system locale" >&2
+    return 1
   fi
 }
 
@@ -338,7 +339,7 @@ function main() {
   configure_wsl_settings "${hostname}" || return 1
   install_desktop_environment "${desktop_choice}" || return 1
   configure_x_session "${desktop_choice}" || return 1
-  configure_system_locale
+  #configure_system_locale || return 1
   install_rdp_services || return 1
   configure_rdp_settings "${rdp_port}" "${listen_port}" || return 1
 
