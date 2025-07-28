@@ -8,6 +8,7 @@ save_environment() {
     echo "WSL_INTEROP='$WSL_INTEROP'"
     echo "WSL_SYSTEMD_EXECUTION_ARGS='$WSL_SYSTEMD_EXECUTION_ARGS'"
     echo "PULSE_SERVER='$PULSE_SERVER'"
+    echo "WAYLAND_DISPLAY='$WAYLAND_DISPLAY'"
   } >"${systemd_saved_environment}"
 }
 
@@ -32,7 +33,9 @@ setup_display() {
     fi
 
     unset WAYLAND_DISPLAY
-    rm -f /mnt/wslg/runtime-dir/wayland*
+    if [ -n "$SYSTEMD_PID" ]; then
+      rm -f /run/user/"$(id -u)"/wayland*
+    fi
 
     return
   fi
@@ -43,16 +46,34 @@ setup_display() {
 
   # check whether it is WSL1 or WSL2
   if [ -n "${WSL_INTEROP}" ]; then
+    #Export an environment variable for helping other processes
+    export WSL2=1
+
     if [ -n "${DISPLAY}" ]; then
-      #Export an environment variable for helping other processes
-      export WSL2=1
+
+      if [ -n "$SYSTEMD_PID" ]; then
+        uid="$(id -u)"
+
+        if [ ! -d "/run/user/${uid}" ]; then
+          mkdir -p "/run/user/${uid}" 2>/dev/null
+        fi
+
+        ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/ 2>/dev/null
+        ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/ 2>/dev/null
+
+        if [ ! -d "/run/user/${uid}/pulse" ]; then
+          mkdir -p "/run/user/${uid}/pulse" 2>/dev/null
+          ln -fs /mnt/wslg/runtime-dir/pulse/native /run/user/"${uid}"/pulse/ 2>/dev/null
+          ln -fs /mnt/wslg/runtime-dir/pulse/pid /run/user/"${uid}"/pulse/ 2>/dev/null
+        fi
+
+        unset uid
+      fi
 
       return
     fi
-    #Export an environment variable for helping other processes
-    export WSL2=1
-    # enable external x display for WSL 2
 
+    # enable external x display for WSL 2
     route_exec=$(wslpath 'C:\Windows\system32\route.exe')
 
     if route_exec_path=$(command -v route.exe 2>/dev/null); then
@@ -64,7 +85,7 @@ setup_display() {
     if [ -n "${wsl2_d_tmp}" ]; then
       export DISPLAY="${wsl2_d_tmp}":0
     else
-      wsl2_d_tmp="$(grep </etc/resolv.conf nameserver | awk '{print $2}')"
+      wsl2_d_tmp="$(ip route | grep default | awk '{print $3; exit;}')"
       export DISPLAY="${wsl2_d_tmp}":0
     fi
 
@@ -79,6 +100,33 @@ setup_display() {
   fi
 }
 
+setup_dbus() {
+  # if dbus-launch is installed, then load it
+  if ! (command -v dbus-launch >/dev/null); then
+    return
+  fi
+
+  # Enabled via systemd
+  if [ -n "${DBUS_SESSION_BUS_ADDRESS}" ]; then
+    return
+  fi
+
+  dbus_pid="$(pidof dbus-daemon | cut -d' ' -f1)"
+
+  if [ -z "${dbus_pid}" ]; then
+    dbus_env="$(timeout 2s dbus-launch --auto-syntax)"
+    eval "${dbus_env}"
+
+    echo "${dbus_env}" >"/tmp/dbus_env_${DBUS_SESSION_BUS_PID}"
+
+    unset dbus_env
+  else # Running from a previous session
+    eval "$(cat "/tmp/dbus_env_${dbus_pid}")"
+  fi
+
+  unset dbus_pid
+}
+
 main() {
   # Only the default WSL user should run this script
   if ! (id -Gn | grep -c "adm.*wheel\|wheel.*adm" >/dev/null); then
@@ -87,16 +135,16 @@ main() {
 
   systemd_saved_environment="$HOME/.systemd.env"
 
+  SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
+
   setup_display
 
-  # if dbus-launch is installed then load it
-  if (command -v dbus-launch >/dev/null 2>&1); then
-    eval "$(timeout 2s dbus-launch --auto-syntax)"
+  if [ -z "$SYSTEMD_PID" ]; then
+    setup_dbus
   fi
 
   # speed up some GUI apps like gedit
   export NO_AT_BRIDGE=1
-  export TERM=xterm-256color
 
   # Fix 'clear' scrolling issues
   alias clear='clear -x'
@@ -110,16 +158,18 @@ main() {
     #Setup video acceleration
     export VDPAU_DRIVER=d3d12
     export LIBVA_DRIVER_NAME=d3d12
-  fi
+    sudo /usr/local/bin/pengwinenterprise-load-vgem-module
 
-  # Fix $PATH for Systemd
-  SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
+    # Setup Gallium Direct3D 12 driver
+    export GALLIUM_DRIVER=d3d12
+  fi
 
   if [ -z "$SYSTEMD_PID" ]; then
 
     save_environment
 
-  elif [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" -eq 1 ] && [ -f "$HOME/.systemd.env" ]; then
+  elif [ -n "$SYSTEMD_PID" ] && [ "$SYSTEMD_PID" -eq 1 ] && [ -f "$HOME/.systemd.env" ] && [ -n "$WSL_SYSTEMD_EXECUTION_ARGS" ]; then
+    # Only if bult-in systemd was started
     set -a
     # shellcheck disable=SC1090
     . "${systemd_saved_environment}"
@@ -131,9 +181,9 @@ main() {
   # Check if we have Windows Path
   if [ -z "$WIN_HOME" ] && (command -v cmd.exe >/dev/null 2>&1); then
 
-    # Create a symbolic link to the windows home
+    # Create a symbolic link to the window's home
 
-    # Here have a issue: %HOMEDRIVE% might be using a custom set location
+    # Here has an issue: %HOMEDRIVE% might be using a custom set location
     # moving cmd to where Windows is installed might help: %SYSTEMDRIVE%
     wHomeWinPath=$(cmd.exe /c 'cd %SYSTEMDRIVE%\ && echo %HOMEDRIVE%%HOMEPATH%' 2>/dev/null | tr -d '\r')
 
