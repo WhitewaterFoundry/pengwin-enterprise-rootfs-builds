@@ -39,7 +39,7 @@ for ((i = 0; i < length; i++)); do
       sudo dnf -y install --allowerasing --nogpgcheck libva-utils
       sudo dnf versionlock add llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
 
-    elif [[ $(dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
+    elif [[ $(sudo dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
       sudo dnf versionlock add llvm-libs
     fi
   fi
