@@ -7,8 +7,8 @@
 # RDP port, listen port, and desktop environment selection.
 #
 # Globals:
-#   PENGWIN_SETUP_TITLE - Title for dialog boxes
-#   DIALOG_RC - Configuration file for dialog appearance
+#   PENGWIN_SETUP_TITLE - Title for whiptail dialogs
+#   NEWT_COLORS - Color scheme for newt/whiptail dialogs
 # Arguments:
 #   None
 # Returns:
@@ -23,47 +23,24 @@ readonly DEFAULT_RDP_PORT="3396"
 readonly DEFAULT_LISTEN_PORT="3346"
 readonly DEFAULT_LOCALE="en_US.UTF-8"
 
-# Configure dialog appearance
-export DIALOG_RC="${HOME}/.dialogrc"
-cat > "${DIALOG_RC}" << 'EOF'
-# Dialog configuration for Pengwin Setup
-use_shadow = ON
-use_colors = ON
-screen_color = (CYAN,BLUE,ON)
-shadow_color = (BLACK,BLACK,ON)
-dialog_color = (BLACK,WHITE,OFF)
-title_color = (BLUE,WHITE,ON)
-border_color = (WHITE,WHITE,ON)
-button_active_color = (WHITE,BLUE,ON)
-button_inactive_color = (BLACK,WHITE,OFF)
-button_key_active_color = (WHITE,BLUE,ON)
-button_key_inactive_color = (RED,WHITE,OFF)
-button_label_active_color = (YELLOW,BLUE,ON)
-button_label_inactive_color = (BLACK,WHITE,ON)
-inputbox_color = (BLACK,WHITE,OFF)
-inputbox_border_color = (BLACK,WHITE,OFF)
-searchbox_color = (BLACK,WHITE,OFF)
-searchbox_title_color = (BLUE,WHITE,ON)
-searchbox_border_color = (WHITE,WHITE,ON)
-position_indicator_color = (BLUE,WHITE,ON)
-menubox_color = (BLACK,WHITE,OFF)
-menubox_border_color = (WHITE,WHITE,ON)
-item_color = (BLACK,WHITE,OFF)
-item_selected_color = (WHITE,BLUE,ON)
-tag_color = (BLUE,WHITE,ON)
-tag_selected_color = (YELLOW,BLUE,ON)
-tag_key_color = (RED,WHITE,OFF)
-tag_key_selected_color = (RED,BLUE,ON)
-check_color = (BLACK,WHITE,OFF)
-check_selected_color = (WHITE,BLUE,ON)
-uarrow_color = (GREEN,WHITE,ON)
-darrow_color = (GREEN,WHITE,ON)
-itemhelp_color = (WHITE,BLACK,OFF)
-form_active_text_color = (WHITE,BLUE,ON)
-form_text_color = (WHITE,CYAN,ON)
-form_item_readonly_color = (CYAN,WHITE,ON)
-gauge_color = (BLUE,WHITE,ON)
-EOF
+# Color scheme for whiptail dialogs
+export NEWT_COLORS='
+    root=lightgray,black
+    roottext=lightgray,black
+    shadow=black,gray
+    title=magenta,lightgray
+    checkbox=lightgray,blue
+    actcheckbox=lightgray,magenta
+    emptyscale=lightgray,blue
+    fullscale=lightgray,magenta
+    button=lightgray,magenta
+    actbutton=magenta,lightgray
+    compactbutton=magenta,lightgray
+    listbox=lightgray,blue
+    actlistbox=lightgray,magenta
+    sellistbox=lightgray,magenta
+    actsellistbox=lightgray,magenta
+'
 
 # Get the primary IP address of the WSL instance
 function get_wsl_ip_address() {
@@ -119,7 +96,7 @@ function show_configuration_summary() {
   summary_text+="If hostname resolution fails, use the IP address.\n\n"
   summary_text+="The WSL distribution will now restart to apply changes."
 
-  dialog --backtitle "${PENGWIN_SETUP_TITLE}" \
+  whiptail --backtitle "${PENGWIN_SETUP_TITLE}" \
     --title "Setup Complete - Configuration Summary" \
     --msgbox "${summary_text}" 25 80
 }
@@ -147,20 +124,12 @@ function install_ui_dependencies() {
 # Get hostname from user input
 function get_hostname_input() {
   local hostname
-  local temp_file
-  temp_file=$(mktemp)
-
-  if ! dialog --backtitle "${PENGWIN_SETUP_TITLE}" \
-    --title "Hostname Configuration" \
-    --inputbox "Enter the desired hostname that will identify this distribution instead of IP address:" \
-    10 70 "${DEFAULT_HOSTNAME}" 2>"${temp_file}"; then
-    rm -f "${temp_file}"
+  if ! hostname=$(whiptail --backtitle "${PENGWIN_SETUP_TITLE}" \
+    --title "Enter the desired hostname that will identify this distribution instead of IP address" \
+    --inputbox "hostname: " 8 100 "${DEFAULT_HOSTNAME}" 3>&1 1>&2 2>&3); then
     echo "Error: Hostname input cancelled" >&2
     return 1
   fi
-
-  hostname=$(cat "${temp_file}")
-  rm -f "${temp_file}"
 
   if [[ -z "${hostname}" ]]; then
     echo "Error: Hostname cannot be empty" >&2
@@ -173,20 +142,12 @@ function get_hostname_input() {
 # Get RDP port from user input
 function get_rdp_port_input() {
   local port
-  local temp_file
-  temp_file=$(mktemp)
-
-  if ! dialog --backtitle "${PENGWIN_SETUP_TITLE}" \
-    --title "RDP Port Configuration" \
-    --inputbox "Enter the desired RDP Port:" \
-    8 50 "${DEFAULT_RDP_PORT}" 2>"${temp_file}"; then
-    rm -f "${temp_file}"
+  if ! port=$(whiptail --backtitle "${PENGWIN_SETUP_TITLE}" \
+    --title "Enter the desired RDP Port" \
+    --inputbox "RDP Port: " 8 50 "${DEFAULT_RDP_PORT}" 3>&1 1>&2 2>&3); then
     echo "Error: RDP port input cancelled" >&2
     return 1
   fi
-
-  port=$(cat "${temp_file}")
-  rm -f "${temp_file}"
 
   if [[ -z "${port}" ]]; then
     echo "Error: RDP port cannot be empty" >&2
@@ -199,20 +160,12 @@ function get_rdp_port_input() {
 # Get listen port from user input
 function get_listen_port_input() {
   local listen_port
-  local temp_file
-  temp_file=$(mktemp)
-
-  if ! dialog --backtitle "${PENGWIN_SETUP_TITLE}" \
-    --title "Session Manager Port Configuration" \
-    --inputbox "Enter the desired session manager Listen Port:" \
-    8 60 "${DEFAULT_LISTEN_PORT}" 2>"${temp_file}"; then
-    rm -f "${temp_file}"
+  if ! listen_port=$(whiptail --backtitle "${PENGWIN_SETUP_TITLE}" \
+    --title "Enter the desired session manager Listen Port" \
+    --inputbox "Listen Port: " 8 70 "${DEFAULT_LISTEN_PORT}" 3>&1 1>&2 2>&3); then
     echo "Error: Listen port input cancelled" >&2
     return 1
   fi
-
-  listen_port=$(cat "${temp_file}")
-  rm -f "${temp_file}"
 
   if [[ -z "${listen_port}" ]]; then
     echo "Error: Listen port cannot be empty" >&2
@@ -225,22 +178,15 @@ function get_listen_port_input() {
 # Get desktop environment selection from user
 function get_desktop_choice() {
   local desktop_choice
-  local temp_file
-  temp_file=$(mktemp)
-
-  if ! dialog --backtitle "${PENGWIN_SETUP_TITLE}" \
-    --title "Desktop Environment Selection" \
-    --radiolist "Choose your desired Desktop Environment:" \
-    12 60 2 \
-    "GNOME" "GNOME Desktop Environment" on \
-    "Xfce" "XFCE 4 Desktop" off 2>"${temp_file}"; then
-    rm -f "${temp_file}"
+  if ! desktop_choice=$(whiptail --backtitle "${PENGWIN_SETUP_TITLE}" \
+    --title "Desktop Selection" --radiolist --separate-output \
+    "Choose your desired Desktop Environment\n[SPACE to select, ENTER to confirm]:" \
+    12 45 2 \
+    "GNOME" "GNOME Desktop Environment   " on \
+    "Xfce" "XFCE 4 Desktop" off 3>&1 1>&2 2>&3); then
     echo "Error: Desktop selection cancelled" >&2
     return 1
   fi
-
-  desktop_choice=$(cat "${temp_file}")
-  rm -f "${temp_file}"
 
   if [[ -z "${desktop_choice}" ]]; then
     echo "Error: No desktop environment selected" >&2
@@ -420,18 +366,8 @@ function terminate_wsl_distribution() {
   fi
 }
 
-# Cleanup temporary files
-function cleanup() {
-  if [[ -f "${DIALOG_RC}" ]]; then
-    rm -f "${DIALOG_RC}"
-  fi
-}
-
 # Main setup function
 function main() {
-  # Setup cleanup trap
-  trap cleanup EXIT
-
   echo "Starting Pengwin Enterprise Desktop Setup..."
 
   # Run update script if available
