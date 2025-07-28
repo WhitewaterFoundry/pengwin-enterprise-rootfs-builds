@@ -63,6 +63,7 @@ version_major=$(echo "${VERSION_ID}" | cut -d '.' -f 1)
 sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-"${version_major}".noarch.rpm
 sudo yum install -y epel-release
 
+sudo yum -y install libva-utils crudini
 sudo yum -y group install "${desktop_choice}"
 
 declare -A desktop_execs
