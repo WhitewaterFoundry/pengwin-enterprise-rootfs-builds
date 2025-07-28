@@ -42,6 +42,65 @@ export NEWT_COLORS='
     actsellistbox=lightgray,magenta
 '
 
+# Get the primary IP address of the WSL instance
+function get_wsl_ip_address() {
+  local ip_address=""
+
+  # Try to get IP from hostname -I first (most reliable)
+  if command -v hostname >/dev/null 2>&1; then
+    ip_address=$(hostname -I 2>/dev/null | awk '{print $1}' || true)
+  fi
+
+  # Fallback to ip route if hostname -I failed
+  if [[ -z "${ip_address}" ]]; then
+    ip_address=$(ip route get 8.8.8.8 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -1 || true)
+  fi
+
+  # Final fallback to parsing ip addr
+  if [[ -z "${ip_address}" ]]; then
+    ip_address=$(ip addr show 2>/dev/null | grep -E 'inet [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | grep -v '127.0.0.1' | awk '{print $2}' | cut -d'/' -f1 | head -1 || true)
+  fi
+
+  # Default if all methods fail
+  if [[ -z "${ip_address}" ]]; then
+    ip_address="<Unable to detect IP>"
+  fi
+
+  echo "${ip_address}"
+}
+
+# Display final configuration summary
+function show_configuration_summary() {
+  local hostname="${1}"
+  local rdp_port="${2}"
+  local listen_port="${3}"
+  local desktop_choice="${4}"
+  local ip_address="${5}"
+
+  local summary_text=""
+  summary_text+="Setup completed successfully!\n\n"
+  summary_text+="CONFIGURATION SUMMARY:\n"
+  summary_text+="=====================\n\n"
+  summary_text+="Hostname: ${hostname}\n"
+  summary_text+="Desktop Environment: ${desktop_choice}\n"
+  summary_text+="RDP Port: ${rdp_port}\n"
+  summary_text+="Session Manager Port: ${listen_port}\n"
+  summary_text+="WSL IP Address: ${ip_address}\n\n"
+  summary_text+="CONNECTION INFORMATION:\n"
+  summary_text+="======================\n\n"
+  summary_text+="Primary connection (using hostname):\n"
+  summary_text+="  ${hostname}:${rdp_port}\n\n"
+  summary_text+="Fallback connection (using IP address):\n"
+  summary_text+="  ${ip_address}:${rdp_port}\n\n"
+  summary_text+="Use these connection details in your RDP client.\n"
+  summary_text+="If hostname resolution fails, use the IP address.\n\n"
+  summary_text+="The WSL distribution will now restart to apply changes."
+
+  whiptail --backtitle "${PENGWIN_SETUP_TITLE}" \
+    --title "Setup Complete - Configuration Summary" \
+    --msgbox "${summary_text}" 25 80
+}
+
 # Run update script
 function run_update_script() {
   if command -v update.sh >/dev/null 2>&1; then
@@ -342,6 +401,13 @@ function main() {
   #configure_system_locale || return 1
   install_rdp_services || return 1
   configure_rdp_settings "${rdp_port}" "${listen_port}" || return 1
+
+  # Get IP address for the summary
+  local ip_address
+  ip_address=$(get_wsl_ip_address)
+
+  # Show final configuration summary
+  show_configuration_summary "${hostname}" "${rdp_port}" "${listen_port}" "${desktop_choice}" "${ip_address}"
 
   echo "Setup completed successfully!"
   echo "Terminating WSL distribution to apply changes..."
