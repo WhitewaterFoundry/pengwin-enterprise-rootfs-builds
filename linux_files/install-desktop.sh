@@ -252,8 +252,7 @@ function configure_x_session() {
 # Configure system locale
 function configure_system_locale() {
   if ! sudo localectl set-locale "LANG=${DEFAULT_LOCALE}"; then
-    echo "Error: Failed to set system locale" >&2
-    return 1
+    return
   fi
 }
 
