@@ -23,7 +23,7 @@ sudo rm -f /var/lib/rpm/.rpm.lock
 # Update mesa
 source /etc/os-release
 
-declare -a mesa_version=('23.1.4-2_wsl' '24.2.8-2_wsl')
+declare -a mesa_version=('23.1.4-2_wsl' '24.2.8-2_wsl_2')
 declare -a llvm_version=('17.0.6' '19.1.7')
 declare -a target_version=('8' '9')
 declare -i length=${#mesa_version[@]}
@@ -39,7 +39,7 @@ for ((i = 0; i < length; i++)); do
       sudo dnf -y install --allowerasing --nogpgcheck libva-utils
       sudo dnf versionlock add llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
 
-    elif [[ $(dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
+    elif [[ $(sudo dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
       sudo dnf versionlock add llvm-libs
     fi
   fi
@@ -85,13 +85,14 @@ fi
 # Mask conflicting services
 sudo ln -sf /dev/null /etc/systemd/system/systemd-resolved.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-networkd.service
-sudo ln -sf /dev/null /etc/systemd/system/NetworkManager.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-clean.timer
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev-early.service
 sudo ln -sf /dev/null /etc/systemd/system/systemd-tmpfiles-setup-dev.service
 sudo ln -sf /dev/null /etc/systemd/system/tmp.mount
+sudo ln -sf /dev/null /etc/systemd/system/NetworkManager.service
+sudo ln -sf /dev/null /etc/systemd/system/NetworkManager-wait-online.service
 
 if [[ ${VERSION_ID} == "7"* ]]; then
   sudo curl -L -f "${base_url}/linux_files/systemctl.py" -o /usr/bin/wslsystemctl

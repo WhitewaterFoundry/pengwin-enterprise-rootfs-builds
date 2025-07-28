@@ -54,9 +54,18 @@ setup_display() {
       if [ -n "$SYSTEMD_PID" ]; then
         uid="$(id -u)"
 
-        ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/
-        ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/
-        ln -fs /mnt/wslg/runtime-dir/pulse /run/user/"${uid}"/pulse
+        if [ ! -d "/run/user/${uid}" ]; then
+          mkdir -p "/run/user/${uid}" 2>/dev/null
+        fi
+
+        ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/ 2>/dev/null
+        ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/ 2>/dev/null
+
+        if [ ! -d "/run/user/${uid}/pulse" ]; then
+          mkdir -p "/run/user/${uid}/pulse" 2>/dev/null
+          ln -fs /mnt/wslg/runtime-dir/pulse/native /run/user/"${uid}"/pulse/ 2>/dev/null
+          ln -fs /mnt/wslg/runtime-dir/pulse/pid /run/user/"${uid}"/pulse/ 2>/dev/null
+        fi
 
         unset uid
       fi
@@ -76,7 +85,7 @@ setup_display() {
     if [ -n "${wsl2_d_tmp}" ]; then
       export DISPLAY="${wsl2_d_tmp}":0
     else
-      wsl2_d_tmp="$(grep </etc/resolv.conf nameserver | awk '{print $2}')"
+      wsl2_d_tmp="$(ip route | grep default | awk '{print $3; exit;}')"
       export DISPLAY="${wsl2_d_tmp}":0
     fi
 
@@ -129,7 +138,10 @@ main() {
   SYSTEMD_PID="$(ps -C systemd -o pid= | head -n1)"
 
   setup_display
-  setup_dbus
+
+  if [ -z "$SYSTEMD_PID" ]; then
+    setup_dbus
+  fi
 
   # speed up some GUI apps like gedit
   export NO_AT_BRIDGE=1
