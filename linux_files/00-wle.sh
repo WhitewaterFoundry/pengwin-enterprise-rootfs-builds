@@ -34,7 +34,7 @@ setup_display() {
 
     unset WAYLAND_DISPLAY
     if [ -n "$SYSTEMD_PID" ]; then
-      rm -f /run/user/"$(id -u)"/wayland*
+      rm -f /run/user/"$(id -u)"/wayland* 2>/dev/null
     fi
 
     return
