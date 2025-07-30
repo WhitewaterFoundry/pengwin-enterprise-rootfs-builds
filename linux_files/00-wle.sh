@@ -61,12 +61,19 @@ setup_display() {
         ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/ 2>/dev/null
         ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/ 2>/dev/null
 
-        if [ ! -d "/run/user/${uid}/pulse" ]; then
-          mkdir -p "/run/user/${uid}/pulse" 2>/dev/null
-          ln -fs /mnt/wslg/runtime-dir/pulse/native /run/user/"${uid}"/pulse/ 2>/dev/null
-          ln -fs /mnt/wslg/runtime-dir/pulse/pid /run/user/"${uid}"/pulse/ 2>/dev/null
+        pulse_path="/run/user/${uid}/pulse"
+
+        if [ ! -d "${pulse_path}" ]; then
+          mkdir -p "${pulse_path}" 2>/dev/null
+
+          ln -fs /mnt/wslg/runtime-dir/pulse/native "${pulse_path}"/ 2>/dev/null
+          ln -fs /mnt/wslg/runtime-dir/pulse/pid "${pulse_path}"/ 2>/dev/null
+        elif [ -S "${pulse_path}/native" ]; then
+          rm -f "${pulse_path}/native" 2>/dev/null
+          ln -s /mnt/wslg/runtime-dir/pulse/native "${pulse_path}"/ 2>/dev/null
         fi
 
+        unset pulse_path
         unset uid
       fi
 
