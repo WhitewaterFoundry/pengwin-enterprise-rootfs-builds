@@ -51,17 +51,21 @@ setup_display() {
 
     if [ -n "${DISPLAY}" ]; then
 
-      if [ -n "$SYSTEMD_PID" ]; then
         uid="$(id -u)"
 
-        if [ ! -d "/run/user/${uid}" ]; then
-          mkdir -p "/run/user/${uid}" 2>/dev/null
+        user_path="/run/user/${uid}"
+        if [ ! -d "${user_path}" ]; then
+          mkdir -p "${user_path}" 2>/dev/null
+        fi
+
+        if [ -z "$SYSTEMD_PID" ]; then
+          export XDG_RUNTIME_DIR="${user_path}"
         fi
 
         ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/ 2>/dev/null
         ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/ 2>/dev/null
 
-        pulse_path="/run/user/${uid}/pulse"
+        pulse_path="${user_path}/pulse"
 
         if [ ! -d "${pulse_path}" ]; then
           mkdir -p "${pulse_path}" 2>/dev/null
@@ -75,7 +79,6 @@ setup_display() {
 
         unset pulse_path
         unset uid
-      fi
 
       return
     fi
