@@ -62,21 +62,28 @@ setup_display() {
           export XDG_RUNTIME_DIR="${user_path}"
         fi
 
-        ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/ 2>/dev/null
-        ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/ 2>/dev/null
+        wslg_runtime_dir="/mnt/wslg/runtime-dir"
+
+        ln -fs "${wslg_runtime_dir}"/wayland-0 "${user_path}"/ 2>/dev/null
+        ln -fs "${wslg_runtime_dir}"/wayland-0.lock "${user_path}"/ 2>/dev/null
 
         pulse_path="${user_path}/pulse"
+        wslg_pulse_dir="${wslg_runtime_dir}"/pulse
 
         if [ ! -d "${pulse_path}" ]; then
           mkdir -p "${pulse_path}" 2>/dev/null
 
-          ln -fs /mnt/wslg/runtime-dir/pulse/native "${pulse_path}"/ 2>/dev/null
-          ln -fs /mnt/wslg/runtime-dir/pulse/pid "${pulse_path}"/ 2>/dev/null
+          ln -fs "${wslg_pulse_dir}"/native "${pulse_path}"/ 2>/dev/null
+          ln -fs "${wslg_pulse_dir}"/pid "${pulse_path}"/ 2>/dev/null
+
         elif [ -S "${pulse_path}/native" ]; then
           rm -f "${pulse_path}/native" 2>/dev/null
-          ln -s /mnt/wslg/runtime-dir/pulse/native "${pulse_path}"/ 2>/dev/null
+          ln -s "${wslg_pulse_dir}"/native "${pulse_path}"/ 2>/dev/null
         fi
 
+        unset user_path
+        unset wslg_runtime_dir
+        unset wslg_pulse_dir
         unset pulse_path
         unset uid
 
