@@ -76,6 +76,12 @@ sudo curl -L -f "${base_url}/linux_files/pengwinenterprise-load-vgem-module.sudo
 sudo curl -L -f "${base_url}/linux_files/pengwinenterprise-load-vgem-module.sh" -o /usr/local/bin/pengwinenterprise-load-vgem-module
 sudo chmod +x /usr/local/bin/pengwinenterprise-load-vgem-module
 
+# Add create_userpath script
+sudo curl -L -f "${base_url}/linux_files/create_userpath.sudoers" -o /etc/sudoers.d/create_userpath
+sudo curl -L -f "${base_url}/linux_files/create_userpath.sh" -o /usr/local/bin/create_userpath
+sudo chmod +x /usr/local/bin/create_userpath
+
+# Remove conflicting services
 if [ -f /etc/systemd/system/wsl2-xwayland.service ]; then
   sudo rm -f /etc/systemd/system/wsl2-xwayland.service
   sudo rm -f /etc/systemd/system/wsl2-xwayland.socket
