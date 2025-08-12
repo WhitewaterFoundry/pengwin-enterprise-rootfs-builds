@@ -22,6 +22,9 @@ function main() {
   if [[ ! -d "${user_path}" ]]; then
     mkdir -p "${user_path}" 2>/dev/null
     chown -R "${uid}:${uid}" "${user_path}" 2>/dev/null
+
+    # Take advantage of the superuser and try to create other possible missing directories when systemd is not running
+    mkdir -p "/etc/xdg" 2>/dev/null
   fi
 }
 
