@@ -21,6 +21,7 @@ function main() {
   local user_path="/run/user/${uid}"
   if [[ ! -d "${user_path}" ]]; then
     mkdir -p "${user_path}" 2>/dev/null
+    chown -R "${uid}:${uid}" "${user_path}" 2>/dev/null
   fi
 }
 

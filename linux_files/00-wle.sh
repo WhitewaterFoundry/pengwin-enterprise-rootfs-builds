@@ -55,7 +55,7 @@ setup_display() {
 
         user_path="/run/user/${uid}"
         if [ ! -d "${user_path}" ]; then
-          sudo create_user_path "${uid}" 2>/dev/null
+          sudo /usr/local/bin/create_userpath "${uid}" 2>/dev/null
         fi
 
         if [ -z "$SYSTEMD_PID" ]; then
@@ -129,19 +129,22 @@ setup_dbus() {
   fi
 
   dbus_pid="$(pidof dbus-daemon | cut -d' ' -f1)"
+  dbus_env_file="/tmp/dbus_env_${dbus_pid}"
 
-  if [ -z "${dbus_pid}" ]; then
+  if [ -z "${dbus_pid}" ] || [ ! -f "${dbus_env_file}" ]; then
     dbus_env="$(timeout 2s dbus-launch --auto-syntax)"
     eval "${dbus_env}"
 
-    echo "${dbus_env}" >"/tmp/dbus_env_${DBUS_SESSION_BUS_PID}"
+    dbus_env_file="/tmp/dbus_env_${DBUS_SESSION_BUS_PID}"
+    echo "${dbus_env}" >"${dbus_env_file}"
 
     unset dbus_env
   else # Running from a previous session
-    eval "$(cat "/tmp/dbus_env_${dbus_pid}")"
+    eval "$(cat "${dbus_env_file}")"
   fi
 
   unset dbus_pid
+  unset dbus_env_file
 }
 
 main() {
