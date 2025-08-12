@@ -90,6 +90,10 @@ cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sudoers "${bui
 cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sh "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
 chmod +x "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
 
+cp "${origin_dir}"/linux_files/create_userpath.sudoers "${build_dir}"/etc/sudoers.d/create_userpath
+cp "${origin_dir}"/linux_files/create_userpath.sh "${build_dir}"/usr/local/bin/create_userpath
+chmod +x "${build_dir}"/usr/local/bin/create_userpath
+
 mkdir -p "${build_dir}"/usr/lib/wsl
 cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/lib/wsl/oobe.sh
 chmod +x "${build_dir}"/usr/lib/wsl/oobe.sh

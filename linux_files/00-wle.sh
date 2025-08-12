@@ -55,12 +55,12 @@ setup_display() {
 
         user_path="/run/user/${uid}"
         if [ ! -d "${user_path}" ]; then
-          mkdir -p "${user_path}" 2>/dev/null
+          sudo create_user_path "${uid}" 2>/dev/null
         fi
 
-        #if [ -z "$SYSTEMD_PID" ]; then
-        #  export XDG_RUNTIME_DIR="${user_path}"
-        #fi
+        if [ -z "$SYSTEMD_PID" ]; then
+          export XDG_RUNTIME_DIR="${user_path}"
+        fi
 
         wslg_runtime_dir="/mnt/wslg/runtime-dir"
 
