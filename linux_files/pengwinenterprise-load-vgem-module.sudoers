@@ -1,0 +1,1 @@
+%wheel ALL=NOPASSWD: /usr/local/bin/pengwinenterprise-load-vgem-module
