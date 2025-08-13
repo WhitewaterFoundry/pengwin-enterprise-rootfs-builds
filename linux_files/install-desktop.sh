@@ -393,7 +393,7 @@ function main() {
   echo "  Desktop: ${desktop_choice}"
 
   local systemd_pid
-  systemd_pid="$(ps -C systemd -o pid= | head -n1)"
+  systemd_pid="$(ps -C systemd -o pid= | head -n1 || true)"
 
   # Install and configure components
   install_epel_repository || return 1
