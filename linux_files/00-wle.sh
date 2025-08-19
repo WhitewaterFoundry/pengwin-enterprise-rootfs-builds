@@ -34,7 +34,7 @@ setup_display() {
 
     unset WAYLAND_DISPLAY
     if [ -n "$SYSTEMD_PID" ]; then
-      rm -f /run/user/"$(id -u)"/wayland*
+      rm -f /run/user/"$(id -u)"/wayland* 2>/dev/null
     fi
 
     return
@@ -51,24 +51,41 @@ setup_display() {
 
     if [ -n "${DISPLAY}" ]; then
 
-      if [ -n "$SYSTEMD_PID" ]; then
         uid="$(id -u)"
 
-        if [ ! -d "/run/user/${uid}" ]; then
-          mkdir -p "/run/user/${uid}" 2>/dev/null
+        user_path="/run/user/${uid}"
+        if [ ! -d "${user_path}" ]; then
+          sudo /usr/local/bin/create_userpath "${uid}" 2>/dev/null
         fi
 
-        ln -fs /mnt/wslg/runtime-dir/wayland-0 /run/user/"${uid}"/ 2>/dev/null
-        ln -fs /mnt/wslg/runtime-dir/wayland-0.lock /run/user/"${uid}"/ 2>/dev/null
-
-        if [ ! -d "/run/user/${uid}/pulse" ]; then
-          mkdir -p "/run/user/${uid}/pulse" 2>/dev/null
-          ln -fs /mnt/wslg/runtime-dir/pulse/native /run/user/"${uid}"/pulse/ 2>/dev/null
-          ln -fs /mnt/wslg/runtime-dir/pulse/pid /run/user/"${uid}"/pulse/ 2>/dev/null
+        if [ -z "$SYSTEMD_PID" ]; then
+          export XDG_RUNTIME_DIR="${user_path}"
         fi
 
+        wslg_runtime_dir="/mnt/wslg/runtime-dir"
+
+        ln -fs "${wslg_runtime_dir}"/wayland-0 "${user_path}"/ 2>/dev/null
+        ln -fs "${wslg_runtime_dir}"/wayland-0.lock "${user_path}"/ 2>/dev/null
+
+        pulse_path="${user_path}/pulse"
+        wslg_pulse_dir="${wslg_runtime_dir}"/pulse
+
+        if [ ! -d "${pulse_path}" ]; then
+          mkdir -p "${pulse_path}" 2>/dev/null
+
+          ln -fs "${wslg_pulse_dir}"/native "${pulse_path}"/ 2>/dev/null
+          ln -fs "${wslg_pulse_dir}"/pid "${pulse_path}"/ 2>/dev/null
+
+        elif [ -S "${pulse_path}/native" ]; then
+          rm -f "${pulse_path}/native" 2>/dev/null
+          ln -s "${wslg_pulse_dir}"/native "${pulse_path}"/ 2>/dev/null
+        fi
+
+        unset user_path
+        unset wslg_runtime_dir
+        unset wslg_pulse_dir
+        unset pulse_path
         unset uid
-      fi
 
       return
     fi
@@ -112,19 +129,22 @@ setup_dbus() {
   fi
 
   dbus_pid="$(pidof dbus-daemon | cut -d' ' -f1)"
+  dbus_env_file="/tmp/dbus_env_${dbus_pid}"
 
-  if [ -z "${dbus_pid}" ]; then
+  if [ -z "${dbus_pid}" ] || [ ! -f "${dbus_env_file}" ]; then
     dbus_env="$(timeout 2s dbus-launch --auto-syntax)"
     eval "${dbus_env}"
 
-    echo "${dbus_env}" >"/tmp/dbus_env_${DBUS_SESSION_BUS_PID}"
+    dbus_env_file="/tmp/dbus_env_${DBUS_SESSION_BUS_PID}"
+    echo "${dbus_env}" >"${dbus_env_file}"
 
     unset dbus_env
   else # Running from a previous session
-    eval "$(cat "/tmp/dbus_env_${dbus_pid}")"
+    eval "$(cat "${dbus_env_file}")"
   fi
 
   unset dbus_pid
+  unset dbus_env_file
 }
 
 main() {

@@ -392,13 +392,20 @@ function main() {
   echo "  Listen Port: ${listen_port}"
   echo "  Desktop: ${desktop_choice}"
 
+  local systemd_pid
+  systemd_pid="$(ps -C systemd -o pid= | head -n1)"
+
   # Install and configure components
   install_epel_repository || return 1
   install_required_tools || return 1
   configure_wsl_settings "${hostname}" || return 1
   install_desktop_environment "${desktop_choice}" || return 1
   configure_x_session "${desktop_choice}" || return 1
-  #configure_system_locale || return 1
+
+  if [[ -n "${systemd_pid}" ]]; then
+    configure_system_locale
+  fi
+
   install_rdp_services || return 1
   configure_rdp_settings "${rdp_port}" "${listen_port}" || return 1
 
