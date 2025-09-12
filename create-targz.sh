@@ -33,7 +33,7 @@ ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-
 cd "$tmp_dir"
 
 echo "##[section] make sure we are up-to-date"
-dnf -y update
+dnf -y update --no-best
 
 echo "##[section] get livemedia-creator dependencies"
 dnf -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
