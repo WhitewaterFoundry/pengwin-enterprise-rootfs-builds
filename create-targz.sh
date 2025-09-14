@@ -8,7 +8,7 @@ if [[ ${USER} != "root" ]]; then
 fi
 
 #declare variables
-enterprise_version=9
+enterprise_version=10
 origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
