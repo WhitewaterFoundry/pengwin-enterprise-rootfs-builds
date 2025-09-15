@@ -52,7 +52,8 @@ ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 * 0.75Ap" | bc -l | cut 
 
 # Run livemedia-creator and check its exit code explicitly
 set +e
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
+echo "##[command] " livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}" --logfile "${dest_dir}/lmc-run.log"
+livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}" --logfile "${dest_dir}/lmc-run.log"
 lmc_rc=$?
 set -e
 if [[ ${lmc_rc} -ne 0 ]]; then
