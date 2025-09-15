@@ -49,7 +49,16 @@ rm -f "${install_tar_gz}"
 echo "##[section] build intermediary rootfs tar"
 processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
 ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 * 0.75Ap" | bc -l | cut -d'.' -f1)
+
+# Run livemedia-creator and check its exit code explicitly
+set +e
 livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}"
+lmc_rc=$?
+set -e
+if [[ ${lmc_rc} -ne 0 ]]; then
+  echo "##[error] livemedia-creator failed with exit code ${lmc_rc}"
+fi
+
 unset processor_count
 unset ram
 
