@@ -8,7 +8,7 @@ jobs:
   steps:
   - task: AzureCLI@2
     inputs:
-      azureSubscription: 'Microsoft Partner Network(f09d9bd9-613b-451c-af5f-317bb659c029)'
+      azureSubscription: 'Pengwin Enterprise - Microsoft Partner Network'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL2 --no-wait'
