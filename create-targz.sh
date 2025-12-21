@@ -33,7 +33,8 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] remove the cloud-user"
-bash remove-cloud-user-offline.sh "${build_dir}"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+bash "${script_dir}"/remove-cloud-user-offline.sh "${build_dir}"
 
 echo "##[section] Some shell tweaks"
 echo "source /etc/vimrc" > "${build_dir}"/etc/skel/.vimrc
