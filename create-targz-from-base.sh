@@ -1,0 +1,92 @@
+#!/bin/bash
+
+set -e
+
+if [[ ${USER} != "root" ]]; then
+  echo "This script must be run with root"
+  exit 1
+fi
+
+#declare variables
+enterprise_version=10
+origin_dir=$(pwd)
+tmp_dir=${2:-$(mktemp -d)}
+build_dir=${tmp_dir}/dist
+dest_dir=${tmp_dir}/dest
+install_tar_gz="/root/install-rhel${enterprise_version}.wsl"
+
+echo "##[section] clean up"
+rm -rf "${build_dir}"
+rm -rf "${dest_dir}"
+
+mkdir -p "${dest_dir}"
+mkdir -p "${build_dir}"
+
+#go to our temporary directory
+cd "$tmp_dir"
+
+echo "##[section] make sure we are up-to-date"
+dnf -y update --nobest
+
+
+echo "##[section] open up the tar into our build directory"
+tar -xf "${install_tar_gz}" -C "${build_dir}"
+
+echo "##[section] copy some custom files into our build directory"
+mkdir -p "${build_dir}"/var/lib/dbus
+
+cp "${origin_dir}"/linux_files/wsl.conf "${build_dir}"/etc/wsl.conf
+cp "${origin_dir}"/linux_files/wsl-distribution.conf "${build_dir}"/etc/wsl-distribution.conf
+mkdir -p "${build_dir}"/etc/fonts
+cp "${origin_dir}"/linux_files/local.conf "${build_dir}"/etc/fonts/local.conf
+cp "${origin_dir}"/linux_files/DB_CONFIG "${build_dir}"/var/lib/rpm/
+cp "${origin_dir}"/linux_files/00-wle.sh "${build_dir}"/etc/profile.d/
+cp "${origin_dir}"/linux_files/bash-prompt-wsl.sh "${build_dir}"/etc/profile.d/
+
+cp "${origin_dir}"/linux_files/upgrade.sh "${build_dir}"/usr/local/bin/upgrade.sh
+
+cp "${origin_dir}"/linux_files/install-desktop.sh "${build_dir}"/usr/local/bin/install-desktop.sh
+chmod +x "${build_dir}"/usr/local/bin/install-desktop.sh
+
+chmod +x "${build_dir}"/usr/local/bin/upgrade.sh
+ln -s /usr/local/bin/upgrade.sh "${build_dir}"/usr/local/bin/update.sh
+
+cp "${origin_dir}"/linux_files/start-systemd.sudoers "${build_dir}"/etc/sudoers.d/start-systemd
+cp "${origin_dir}"/linux_files/start-systemd.sh "${build_dir}"/usr/local/bin/start-systemd
+chmod +x "${build_dir}"/usr/local/bin/start-systemd
+
+cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sudoers "${build_dir}"/etc/sudoers.d/pengwinenterprise-load-vgem-module
+cp "${origin_dir}"/linux_files/pengwinenterprise-load-vgem-module.sh "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
+chmod +x "${build_dir}"/usr/local/bin/pengwinenterprise-load-vgem-module
+
+cp "${origin_dir}"/linux_files/create_userpath.sudoers "${build_dir}"/etc/sudoers.d/create_userpath
+cp "${origin_dir}"/linux_files/create_userpath.sh "${build_dir}"/usr/local/bin/create_userpath
+chmod +x "${build_dir}"/usr/local/bin/create_userpath
+
+mkdir -p "${build_dir}"/usr/lib/wsl
+cp "${origin_dir}"/linux_files/oobe.sh "${build_dir}"/usr/lib/wsl/oobe.sh
+chmod +x "${build_dir}"/usr/lib/wsl/oobe.sh
+
+cp "${origin_dir}"/linux_files/pengwin-enterprise.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.ico
+cp "${origin_dir}"/linux_files/pengwin-enterprise.theme-dark.ico "${build_dir}"/usr/lib/wsl/pengwin-enterprise.theme-dark.ico
+cp "${origin_dir}"/linux_files/terminal-profile.json "${build_dir}"/usr/lib/wsl/terminal-profile.json
+
+#cp "${origin_dir}"/linux_files/wsl2-xwayland.service "${build_dir}"/etc/systemd/system/wsl2-xwayland.service
+#cp "${origin_dir}"/linux_files/wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/wsl2-xwayland.socket
+#mkdir -p "${build_dir}"/etc/systemd/system/sockets.target.wants
+#ln -sf ../wsl2-xwayland.socket "${build_dir}"/etc/systemd/system/sockets.target.wants/
+
+cp "${origin_dir}"/linux_files/systemctl3.py "${build_dir}"/usr/bin/wslsystemctl
+chmod +x "${build_dir}"/usr/bin/wslsystemctl
+cp "${origin_dir}"/linux_files/journalctl3.py "${build_dir}"/usr/bin/wsljournalctl
+chmod +x "${build_dir}"/usr/bin/wsljournalctl
+
+rm "${build_dir}"/etc/resolv.conf
+
+echo "##[section] re-build our tar image"
+cd "${build_dir}"
+mkdir -p "${origin_dir}"/x64
+tar --exclude='boot/*' --exclude=proc --exclude=dev --exclude=sys --exclude='var/cache/dnf/*' --numeric-owner --absolute-names -c ./* | gzip --best >"${origin_dir}"/x64/install.tar.gz
+
+echo "##[section] go home"
+cd "${origin_dir}"
