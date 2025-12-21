@@ -56,6 +56,10 @@ function create_user() {
     return 1
   fi
 
+  if ! getent group wsl-video >/dev/null; then
+    /usr/sbin/groupadd -g 44 wsl-video
+  fi
+
   if ! (/usr/sbin/usermod -aG "${default_groups}" "${username}"); then
     /usr/sbin/userdel "${username}"
     restore_previous_home "$username" "${previous_home}"

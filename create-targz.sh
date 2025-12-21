@@ -13,8 +13,7 @@ origin_dir=$(pwd)
 tmp_dir=${2:-$(mktemp -d)}
 build_dir=${tmp_dir}/dist
 dest_dir=${tmp_dir}/dest
-install_iso="/root/install-rhel${enterprise_version}.iso"
-install_tar_gz=${dest_dir}/install.tar.gz
+install_tar_gz="/root/install-rhel${enterprise_version}.wsl"
 
 echo "##[section] clean up"
 rm -rf "${build_dir}"
@@ -23,48 +22,35 @@ rm -rf "${dest_dir}"
 mkdir -p "${dest_dir}"
 mkdir -p "${build_dir}"
 
-#enterprise Docker kickstart file
-ks_file="https://raw.githubusercontent.com/WhitewaterFoundry/sig-cloud-instance-build/master/docker/rhel-${enterprise_version}.ks"
-
 #go to our temporary directory
 cd "$tmp_dir"
 
 echo "##[section] make sure we are up-to-date"
+dnf -y install xz
 dnf -y update --nobest
-
-echo "##[section] get livemedia-creator dependencies"
-dnf -y install libvirt lorax virt-install libvirt-daemon-config-network libvirt-daemon-kvm libvirt-daemon-driver-qemu bc
-
-#get anaconda dependencies
-#dnf -y install anaconda anaconda-tui
-
-echo "##[section] restart libvirtd for good measure"
-systemctl restart libvirtd || echo "Running without SystemD"
-
-echo "##[section] download enterprise Docker kickstart file"
-curl -L -f $ks_file -o install.ks
-
-rm -f "${install_tar_gz}"
-
-echo "##[section] build intermediary rootfs tar"
-processor_count=$(grep -c "processor.*:" /proc/cpuinfo)
-ram=$(free -m | sed -n "sA\(Mem: *\)\([0-9]*\)\(.*\)A\2 * 0.75Ap" | bc -l | cut -d'.' -f1)
-
-# Run livemedia-creator and check its exit code explicitly
-set +e
-echo "##[command] " livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}" --logfile "${dest_dir}/lmc-run.log"
-livemedia-creator --make-tar --iso="${install_iso}" --image-name=install.tar.gz --ks=install.ks --releasever "${enterprise_version}" --vcpus "${processor_count}" --ram=${ram} --compression gzip --tmp "${dest_dir}" --logfile "${dest_dir}/lmc-run.log"
-lmc_rc=$?
-set -e
-if [[ ${lmc_rc} -ne 0 ]]; then
-  echo "##[error] livemedia-creator failed with exit code ${lmc_rc}"
-fi
-
-unset processor_count
-unset ram
 
 echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
+
+echo "##[section] remove the cloud-user"
+bash remove-cloud-user-offline.sh "${build_dir}"
+
+echo "##[section] Some shell tweaks"
+echo "source /etc/vimrc" > "${build_dir}"/etc/skel/.vimrc
+echo "set background=dark" >> "${build_dir}"/etc/skel/.vimrc
+echo "set visualbell" >> "${build_dir}"/etc/skel/.vimrc
+echo "set noerrorbells" >> "${build_dir}"/etc/skel/.vimrc
+
+echo "\$include /etc/inputrc" > "${build_dir}"/etc/skel/.inputrc
+echo "set bell-style none" >> "${build_dir}"/etc/skel/.inputrc
+echo "set show-all-if-ambiguous on" >> "${build_dir}"/etc/skel/.inputrc
+echo "set show-all-if-unmodified on" >> "${build_dir}"/etc/skel/.inputrc
+
+# Fix ping
+chmod u+s "${build_dir}"/usr/bin/ping
+
+echo "##[section] Generate installtime file record"
+/bin/date +%Y%m%d_%H%M > "${build_dir}"/etc/BUILDTIME
 
 echo "##[section] copy some custom files into our build directory"
 mkdir -p "${build_dir}"/var/lib/dbus
