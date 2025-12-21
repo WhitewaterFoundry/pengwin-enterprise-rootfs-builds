@@ -33,7 +33,7 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] remove the cloud-user"
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+script_dir="$(dirname -- "${BASH_SOURCE[0]}")"
 bash "${script_dir}"/remove-cloud-user-offline.sh "${build_dir}"
 
 echo "##[section] Some shell tweaks"
