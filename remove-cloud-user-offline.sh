@@ -92,26 +92,50 @@ if [[ -f "${GSHADOW}" ]]; then
   sed -i -e "/^${USER_NAME}:/d" "${GSHADOW}"
 fi
 
-# Also remove the username from any supplementary group member lists in /etc/group and /etc/gshadow
-# (handles cases where cloud-user is listed as a member of other groups)
-perl -0777 -i -pe '
-  s/^(.*?:.*?:.*?:)([^\n]*)$/
-    my ($p,$m)=($1,$2);
-    my @x = grep { $_ ne "'"${USER_NAME}"'" && $_ ne "" } split(/,/, $m);
-    $p . join(",", @x)
-  /gme
-' "${GROUP}"
+# Remove the username from any supplementary group member lists in /etc/group
+# Format: group:passwd:gid:user1,user2,...
+tmp="$(mktemp)"
+awk -F: -v OFS=: -v u="${USER_NAME}" '
+{
+  # fields: $1=name $2=passwd $3=gid $4=members
+  if (NF < 4) { print; next }
+  n = split($4, a, ",")
+  out = ""
+  for (i = 1; i <= n; i++) {
+    if (a[i] != u && a[i] != "") {
+      out = (out == "" ? a[i] : out "," a[i])
+    }
+  }
+  $4 = out
+  print
+}' "${GROUP}" > "${tmp}"
+cat "${tmp}" > "${GROUP}"
+rm -f "${tmp}"
 
+# Remove the username from any member/admin lists in /etc/gshadow (if present)
+# Format: group:passwd:admins:members
 if [[ -f "${GSHADOW}" ]]; then
-  perl -0777 -i -pe '
-    s/^(.*?:.*?:)([^\n]*)(:.*)$/
-      my ($p,$m,$s)=($1,$2,$3);
-      my @x = grep { $_ ne "'"${USER_NAME}"'" && $_ ne "" } split(/,/, $m);
-      $p . join(",", @x) . $s
-    /gme
-  ' "${GSHADOW}"
+  tmp="$(mktemp)"
+  awk -F: -v OFS=: -v u="${USER_NAME}" '
+  function filter(list,    n,i,a,out) {
+    n = split(list, a, ",")
+    out = ""
+    for (i = 1; i <= n; i++) {
+      if (a[i] != u && a[i] != "") {
+        out = (out == "" ? a[i] : out "," a[i])
+      }
+    }
+    return out
+  }
+  {
+    if (NF < 4) { print; next }
+    $3 = filter($3)  # admins
+    $4 = filter($4)  # members
+    print
+  }' "${GSHADOW}" > "${tmp}"
+  cat "${tmp}" > "${GSHADOW}"
+  rm -f "${tmp}"
 fi
-
 # Remove home directory
 if [[ -z "${HOME_DIR}" ]]; then
   HOME_DIR="/home/${USER_NAME}"
