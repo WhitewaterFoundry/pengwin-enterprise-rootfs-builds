@@ -209,6 +209,10 @@ function install_epel_repository() {
   local version_major
   version_major=$(echo "${VERSION_ID}" | cut -d '.' -f 1)
 
+  if [[ ${version_major} == "10" ]]; then
+    return 0
+  fi
+
   if ! sudo yum install -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${version_major}.noarch.rpm"; then
     echo "Error: Failed to install EPEL repository" >&2
     return 1
@@ -222,7 +226,19 @@ function install_epel_repository() {
 
 # Install required tools
 function install_required_tools() {
-  if ! sudo yum -y install libva-utils crudini; then
+  if ! sudo yum -y install crudini; then
+    echo "Error: Failed to install required tools" >&2
+    return 1
+  fi
+
+  local version_major
+  version_major=$(echo "${VERSION_ID}" | cut -d '.' -f 1)
+
+  if [[ ${version_major} == "10" ]]; then
+    return 0
+  fi
+
+  if ! sudo yum -y install libva-utils; then
     echo "Error: Failed to install required tools" >&2
     return 1
   fi
