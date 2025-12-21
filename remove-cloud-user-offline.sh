@@ -54,12 +54,6 @@ if [[ "$(readlink -f "${ROOTFS}")" == "/" ]]; then
   exit 2
 fi
 
-timestamp() { date +"%Y%m%d-%H%M%S"; }
-backup_file() {
-  local f="$1"
-  cp -a "$f" "${f}.bak.$(timestamp)"
-}
-
 echo "ROOTFS: ${ROOTFS}"
 echo "User:   ${USER_NAME} (UID ${USER_UID})"
 echo "MODE:   ${MODE}"
@@ -68,14 +62,6 @@ echo "MODE:   ${MODE}"
 HOME_DIR=""
 if grep -qE "^${USER_NAME}:" "${PASSWD}"; then
   HOME_DIR="$(awk -F: -v u="${USER_NAME}" '$1==u{print $6}' "${PASSWD}" | head -n1 || true)"
-fi
-
-# Back up files before editing
-backup_file "${PASSWD}"
-backup_file "${GROUP}"
-backup_file "${SHADOW}"
-if [[ -f "${GSHADOW}" ]]; then
-  backup_file "${GSHADOW}"
 fi
 
 echo "Removing account entries from /etc/*..."
@@ -202,8 +188,3 @@ REMAINING_COUNT="$(
 echo "Remaining UID ${USER_UID} owned paths: ${REMAINING_COUNT}"
 
 echo "Done."
-echo "Backups created:"
-echo "  ${PASSWD}.bak.*"
-echo "  ${GROUP}.bak.*"
-echo "  ${SHADOW}.bak.*"
-[[ -f "${GSHADOW}" ]] && echo "  ${GSHADOW}.bak.*"

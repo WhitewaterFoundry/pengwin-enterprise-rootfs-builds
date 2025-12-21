@@ -33,8 +33,9 @@ echo "##[section] open up the tar into our build directory"
 tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] remove the cloud-user"
-script_dir="$(dirname -- "${BASH_SOURCE[0]}")"
-bash "/home/cloud-user/src/pengwin-enterprise-rootfs-builds"/remove-cloud-user-offline.sh "${build_dir}"
+#script_dir="$(dirname -- "${BASH_SOURCE[0]}")"
+#bash "/home/cloud-user/src/pengwin-enterprise-rootfs-builds"/remove-cloud-user-offline.sh "${build_dir}"
+touch "${build_dir}"/etc/cloud/cloud-init.disabled
 
 echo "##[section] Some shell tweaks"
 echo "source /etc/vimrc" > "${build_dir}"/etc/skel/.vimrc
