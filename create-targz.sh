@@ -34,7 +34,7 @@ tar -xf "${install_tar_gz}" -C "${build_dir}"
 
 echo "##[section] remove the cloud-user"
 script_dir="$(dirname -- "${BASH_SOURCE[0]}")"
-bash "${script_dir}"/remove-cloud-user-offline.sh "${build_dir}"
+bash "/home/cloud-user/src/pengwin-enterprise-rootfs-builds"/remove-cloud-user-offline.sh "${build_dir}"
 
 echo "##[section] Some shell tweaks"
 echo "source /etc/vimrc" > "${build_dir}"/etc/skel/.vimrc
