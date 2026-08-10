@@ -8,7 +8,7 @@
       "backgroundImageOpacity": 0.15,
       "backgroundImageStretchMode": "none",
       "bellStyle": "none",
-      "colorScheme": "Pengwin Enterprise 9",
+      "colorScheme": "Pengwin Enterprise 10",
       "cursorShape": "filledBox",
       "fontFace": "Cascadia Code",
       "startingDirectory": "~",
@@ -18,7 +18,7 @@
   ],
   "schemes": [
     {
-      "name": "Pengwin Enterprise 9",
+      "name": "Pengwin Enterprise 10",
       "background": "#1E1E1E",
       "black": "#171421",
       "blue": "#12488B",
