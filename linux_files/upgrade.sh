@@ -37,6 +37,7 @@ for ((i = 0; i < length; i++)); do
       curl -s https://packagecloud.io/install/repositories/whitewaterfoundry/pengwin-enterprise/script.rpm.sh | sudo bash
       sudo dnf -y install --allowerasing --nogpgcheck "${llvm_version[i]}" mesa-dri-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-vdpau-drivers-"${mesa_version[i]}".el"${target_version[i]}" mesa-libEGL-"${mesa_version[i]}".el"${target_version[i]}" mesa-libgbm-"${mesa_version[i]}".el"${target_version[i]}" mesa-vulkan-drivers-"${mesa_version[i]}".el"${target_version[i]}" glx-utils libva
       sudo dnf -y install --allowerasing --nogpgcheck libva-utils
+      sudo dnf -y install --allowerasing --nogpgcheck mesa-libxatracker-"${mesa_version[i]}".el"${target_version[i]}"
       sudo dnf versionlock add llvm-libs mesa-dri-drivers mesa-libGL mesa-filesystem mesa-libglapi mesa-vdpau-drivers mesa-libEGL mesa-libgbm mesa-libxatracker mesa-vulkan-drivers
 
     elif [[ $(sudo dnf versionlock list | grep -c llvm-libs) == 0 ]]; then
