@@ -366,6 +366,12 @@ function configure_rdp_settings() {
     return 1
   fi
 
+  # Disable the Xorg option on the startup menu by commenting out its section
+  if ! sudo sed -i '/^\[Xorg\]/,/^\[/{/^\[Xorg\]/{s/^/#/;b};/^\[/b;s/^\([^#]\)/#\1/}' /etc/xrdp/xrdp.ini; then
+    echo "Error: Failed to disable the Xorg option in xrdp.ini" >&2
+    return 1
+  fi
+
   # Configure session manager listen port
   if ! sudo sed -i "s/ListenPort=3350/ListenPort=${listen_port}/" /etc/xrdp/sesman.ini; then
     echo "Error: Failed to configure session manager listen port" >&2
