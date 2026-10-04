@@ -13,7 +13,7 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: 'az vm start -g CreateImages -n CreateImageRHEL2 --no-wait'
     displayName: 'Start instance'
-    
+
 - job: ${{ parameters.arch }}
   dependsOn: [ startAgent ]
   workspace:
